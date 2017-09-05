@@ -21,6 +21,7 @@ import com.gzsolartech.smartforms.entity.DatApplication;
 import com.gzsolartech.smartforms.entity.DetFormDefine;
 import com.gzsolartech.smartforms.entity.DetFormField;
 import com.gzsolartech.smartforms.entity.SysTimgJob;
+import com.gzsolartech.smartforms.exceptions.SmartformsException;
 import com.gzsolartech.smartforms.service.BaseDataService;
 import com.gzsolartech.smartforms.service.DatApplicationService;
 import com.gzsolartech.smartforms.service.DetFormDefineService;
@@ -120,38 +121,48 @@ public class SysTimgJobService  extends BaseDataService implements
 	 * @return void 返回类型
 	 * @throws
 	 */
-	public void saveOrUpdate(SysTimgJob sysTimgJob) throws Exception {
+	public String saveOrUpdate(SysTimgJob sysTimgJob) throws Exception {
+		String jobId="";
 		if (StringUtils.isBlank(sysTimgJob.getJobId())) {
-			sysTimgJob.setJobId(UUID.randomUUID().toString());
+			jobId=UUID.randomUUID().toString();
+			sysTimgJob.setJobId(jobId);
 			sysTimgJob.setJobGroup(UUID.randomUUID().toString());
 			sysTimgJob.setJobStatus("2");
 			gdao.save(sysTimgJob);
 		} else {
-			SysTimgJob job = gdao.findById(SysTimgJob.class,
-					sysTimgJob.getJobId());
+			SysTimgJob job = gdao.findById(SysTimgJob.class,sysTimgJob.getJobId());
+			if(job!=null){
+			jobId=sysTimgJob.getJobId();
 			sysTimgJob.setJobStatus("2");
 			BeanUtils.copyProperties(sysTimgJob, job, "createTime", "creator",
 					"lastRunTime", "startRunTime");
 			gdao.update(job);
+			}else{
+				throw new SmartformsException("无法根据任务id找到任务");
+			}
 			try {
 				taskServiceManager.deleteJob(sysTimgJob.getJobId());
 			} catch (Exception e) {
 			}
 		}
+		return jobId;
 	}
 
 	/**
+	 * @throws Exception 
 	 * 
 	 * @Title: deleteJob
 	 * @Description: 删除调度任务信息
 	 * @return void 返回类型
 	 * @throws
 	 */
-	public void deleteJob(String[] jobs) {
+	public void deleteJob(String[] jobs) throws Exception {
 		for (String jobId : jobs) {
 			SysTimgJob sysTimgJob = getScheduleJob(jobId);
 			if (sysTimgJob != null) {
 				gdao.delete(sysTimgJob);
+			}else{
+				throw new Exception("无法根据任务ID="+jobId+" 查询到任务信息，删除失败");
 			}
 		}
 	}

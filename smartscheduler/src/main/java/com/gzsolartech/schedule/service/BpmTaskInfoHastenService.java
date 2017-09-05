@@ -18,12 +18,10 @@ import com.gzsolartech.bpmportal.entity.AacEmployee;
 import com.gzsolartech.bpmportal.service.AACEmployeeService;
 import com.gzsolartech.bpmportal.service.KronosService;
 import com.gzsolartech.smartforms.constant.bpm.BpmMailSendType;
-import com.gzsolartech.smartforms.constant.bpm.BpmRoutingType;
 import com.gzsolartech.smartforms.entity.DatContentTemplate;
 import com.gzsolartech.smartforms.entity.OrgEmployee;
 import com.gzsolartech.smartforms.entity.bpm.BpmActivityMeta;
 import com.gzsolartech.smartforms.entity.bpm.BpmEmailNotificationRecord;
-import com.gzsolartech.smartforms.entity.bpm.BpmGlobalConfig;
 import com.gzsolartech.smartforms.entity.bpm.BpmTaskInfo;
 import com.gzsolartech.smartforms.service.BaseDataService;
 import com.gzsolartech.smartforms.service.DatContentTemplateService;
@@ -65,26 +63,26 @@ public class BpmTaskInfoHastenService extends BaseDataService {
 	@Autowired
 	private AACEmployeeService aacEmployeeService;
 	@Autowired
-   private OrgEmployeeService orgEmployeeService;
+	private OrgEmployeeService orgEmployeeService;
 	@Autowired
 	private SendEmailService sendEmailService;
 	@Autowired
 	private TransferTaskRouterService transferTaskRouterService;
 	@Autowired
 	private KronosService kronosService;
+	@Autowired
+	private ExecuteTransferTaskService executeTransferTaskService;
+
 	/**
-	 * @throws Exception 
-	 * 自动催办
+	 * @throws Exception
+	 *             自动催办
 	 *
 	 * @return void 返回类型
 	 * @throws
 	 */
 	public void execute() throws Exception {
-		 LOGGER.debug("催办调度任务开始执行");
-		// JSONObject j=kronosService.getAllLeave("60001347","2017-05-19");
-		 //System.out.println(j.toString()); 
-		
-		 // 获取所的的待办
+		LOGGER.debug("催办调度任务开始执行");
+		// 获取所的的待办
 		List<BpmTaskInfo> bpmTaskInfos = bpmTaskInfoService
 				.getAllReceivedTask();
 		// 遍历待办信息
@@ -102,39 +100,54 @@ public class BpmTaskInfoHastenService extends BaseDataService {
 					// 待办创建时间距离现在多少分钟
 					int gapMiute = currentTimeGap(bpmTaskInfo.getCreateTime());
 					// 重复初始时间
-					Integer loopStartTimeSpan = bpmActivityMeta	.getLoopStartTimeSpan();
+					Integer loopStartTimeSpan = bpmActivityMeta
+							.getLoopStartTimeSpan();
 					if (loopStartTimeSpan != null) {
 						// 重复初始时间 转化为分钟
-						loopStartTimeSpan = toMinute(bpmActivityMeta.getLoopStartTimeUnit(),loopStartTimeSpan);
-						OrgEmployee employee = gdao.findById(OrgEmployee.class,bpmTaskInfo.getAssignedTo());
-						//待办创建时间格式化
-						String createTime=timestampFormat(bpmTaskInfo.getCreateTime());
-						 String nowTime=timestampFormat(new Timestamp(System.currentTimeMillis())); 
-						//调用HR接口 获取可申请假期的小时
-						 JSONObject kron= kronosService.checkDataRound(employee.getJobNumber(), "123", createTime.substring(0, 10), createTime.substring(11, 16), nowTime.substring(0, 10), nowTime.substring(11, 16));
-						 int amountInTime=kron.getJSONObject("CNLeaveRequest").getInt("AmountInTime");
-						LOGGER.debug("调用HR接口 获取可申请假期的小时:"+amountInTime);
-						 amountInTime=amountInTime*60;
+						loopStartTimeSpan = toMinute(
+								bpmActivityMeta.getLoopStartTimeUnit(),
+								loopStartTimeSpan);
+						OrgEmployee employee = gdao.findById(OrgEmployee.class,
+								bpmTaskInfo.getAssignedTo());
+						// 待办创建时间格式化
+						String createTime = timestampFormat(bpmTaskInfo
+								.getCreateTime());
+						String nowTime = timestampFormat(new Timestamp(
+								System.currentTimeMillis()));
+						// 调用HR接口 获取可申请假期的小时
+						JSONObject kron = kronosService.checkDataRound(
+								employee.getJobNumber(), "123",
+								createTime.substring(0, 10),
+								createTime.substring(11, 16),
+								nowTime.substring(0, 10),
+								nowTime.substring(11, 16));
+						int amountInTime = kron.getJSONObject("CNLeaveRequest")
+								.getInt("AmountInTime");
+						LOGGER.debug("调用HR接口 获取可申请假期的小时:" + amountInTime);
+						amountInTime = amountInTime * 60;
 						// System.out.println("创建时间:"+createTime);
 						// System.out.println("从HR获取分钟:"+amountInTime);
 						// System.out.println("创建到现在分钟:"+gapMiute);
-						 //LOGGER.debug("totalMiute="+gapMiute+"-"+amountInTime+"="+(gapMiute - loopStartTimeSpan));
-						 gapMiute=gapMiute-amountInTime;
-						 //System.out.println("减去HR后分钟:"+gapMiute);
-						int totalMiute=gapMiute - loopStartTimeSpan ;
-						//LOGGER.debug("totalMiute="+gapMiute+"-"+loopStartTimeSpan);
-						if (totalMiute>= 0) {
+						// LOGGER.debug("totalMiute="+gapMiute+"-"+amountInTime+"="+(gapMiute
+						// - loopStartTimeSpan));
+						gapMiute = gapMiute - amountInTime;
+						// System.out.println("减去HR后分钟:"+gapMiute);
+						int totalMiute = gapMiute - loopStartTimeSpan;
+						// LOGGER.debug("totalMiute="+gapMiute+"-"+loopStartTimeSpan);
+						if (totalMiute >= 0) {
 							remind(bpmTaskInfo, bpmActivityMeta);
 						}
 					}
-                  //最迟延迟事件
-					Integer overTimeDeadline=bpmActivityMeta.getOverTimeDeadline();
-					if(overTimeDeadline!=null){
+					// 最迟延迟事件
+					Integer overTimeDeadline = bpmActivityMeta
+							.getOverTimeDeadline();
+					if (overTimeDeadline != null) {
 						overTimeDeadline = toMinute(
-							bpmActivityMeta.getOverTimeDeadlineUnit(),overTimeDeadline);
-						if(gapMiute-overTimeDeadline>0){
-							System.out.println("执行转签===========");
-							//transfer(bpmTaskInfo);
+								bpmActivityMeta.getOverTimeDeadlineUnit(),
+								overTimeDeadline);
+						if (gapMiute - overTimeDeadline > 0) {
+							LOGGER.debug("执行转签===========");
+							transfer(bpmTaskInfo);
 						}
 					}
 				}
@@ -142,37 +155,40 @@ public class BpmTaskInfoHastenService extends BaseDataService {
 				LOGGER.error("自动催办出现异常", e);
 			}
 		}
-		 LOGGER.debug("催办调度任务结束执行");
+		LOGGER.debug("催办调度任务结束执行");
 	}
 
 	/**
 	 * 超时未处理转签领导处理
-	 *@param bpmTaskInfo
-	 * @return void    返回类型 
+	 *
+	 * @param bpmTaskInfo
+	 * @return void 返回类型
 	 * @throws
 	 */
-	public void transfer(BpmTaskInfo bpmTaskInfo){
-	    OrgEmployee employee = gdao.findById(OrgEmployee.class,bpmTaskInfo.getAssignedTo());
-		if(employee!=null){
-	    OrgEmployee leader=getLeaderShip(employee.getEmpNum());
-	    if(leader!=null){
-	    Map<String,Object> data=datDocumentService.getDocumentById(bpmTaskInfo.getDocumentId());
-        BpmGlobalConfig gcfg = bpmGlobalConfigService.getFirstActConfig();
-		String targetUser = leader.getNickName()+"("+leader.getEmpNum()+")";
-		String taskId = bpmTaskInfo.getTaskId();
-		String documentId =bpmTaskInfo.getDocumentId();
-		String appId = data.get("__appid")+"";
-		String note =employee.getNickName()+"待办超时未处理转签给"+targetUser;
-		String fromUserId =employee.getEmpNum();
-		String nodeId = bpmTaskInfo.getNodeId();
-		String instanceId =bpmTaskInfo.getInstanceId();
-		// 调用bpm转签的接口进行转签
-	/*	transferTaskRouterService.executeAuthorizeTransfer(request, gcfg,
-				targetUser, taskId, documentId, appId, note, fromUserId, 
-				BpmRoutingType.OVERTIME_TRANSFER);*/
-		}
+	public void transfer(BpmTaskInfo bpmTaskInfo) {
+		try {
+			OrgEmployee employee = gdao.findById(OrgEmployee.class,
+					bpmTaskInfo.getAssignedTo());
+			if (employee != null) {
+				OrgEmployee leader = getLeaderShip(employee.getEmpNum());
+				if (leader != null) {
+					String targetUser = leader.getNickName() + "("
+							+ leader.getEmpNum() + ")";
+					String taskId = bpmTaskInfo.getTaskId();
+					String documentId = bpmTaskInfo.getDocumentId();
+					String note = employee.getNickName() + "待办超时未处理转签给"
+							+ targetUser;
+					String fromUserId = employee.getEmpNum();
+					executeTransferTaskService.execute(taskId, documentId,
+							fromUserId, targetUser, note);
+
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.error("超时未处理转签领导处理出现异常", e);
 		}
 	}
+
 	/**
 	 * 指定单位下的时间转换成时间
 	 *
@@ -209,12 +225,12 @@ public class BpmTaskInfoHastenService extends BaseDataService {
 	}
 
 	public void remind(BpmTaskInfo bpmTaskInfo, BpmActivityMeta bpmActivityMeta) {
-		 LOGGER.debug("邮件通知:" + bpmTaskInfo.getTaskName());
+		LOGGER.debug("邮件通知:" + bpmTaskInfo.getTaskName());
 		String hql = "from BpmEmailNotificationRecord where documentId=? and metaId=?  and assignTo=? order by assignTo desc";
 		String documentId = bpmTaskInfo.getDocumentId();
 		String assignTo = bpmTaskInfo.getAssignedTo();
-		List<BpmEmailNotificationRecord> bpmEmailRecords = gdao.queryHQL(hql, documentId,
-				bpmActivityMeta.getActivityId(), assignTo);
+		List<BpmEmailNotificationRecord> bpmEmailRecords = gdao.queryHQL(hql,
+				documentId, bpmActivityMeta.getActivityId(), assignTo);
 		if (!bpmEmailRecords.isEmpty()) {
 			BpmEmailNotificationRecord bpmEmailRecord = bpmEmailRecords.get(0);
 			Integer loopTimeSpan = bpmActivityMeta.getLoopTimeSpan();
@@ -255,7 +271,7 @@ public class BpmTaskInfoHastenService extends BaseDataService {
 			Map<String, Object> data = datDocumentService
 					.getDocumentById(bpmTaskInfo.getDocumentId());
 			data.put("_taskId", bpmTaskInfo.getTaskId());
-			 LOGGER.debug("第一次邮件提醒: " + employee.getNickName() + " email="
+			LOGGER.debug("第一次邮件提醒: " + employee.getNickName() + " email="
 					+ email);
 			DatContentTemplate datContentTemplate = datContentTemplateService
 					.load(bpmActivityMeta.getOvertimeTemplateId());
@@ -272,7 +288,7 @@ public class BpmTaskInfoHastenService extends BaseDataService {
 				}
 			}
 			// 发送邮件
-		sendEmailService.sendEmail(email, title, content, null);
+			sendEmailService.sendEmail(email, title, content, null);
 			seveEmailRecord(email, title, content, null, bpmTaskInfo,
 					bpmActivityMeta);
 		}
@@ -287,7 +303,8 @@ public class BpmTaskInfoHastenService extends BaseDataService {
 	 * @throws
 	 */
 	public void loopRemind(BpmTaskInfo bpmTaskInfo,
-			BpmActivityMeta bpmActivityMeta, BpmEmailNotificationRecord bpmEmailRecord) {
+			BpmActivityMeta bpmActivityMeta,
+			BpmEmailNotificationRecord bpmEmailRecord) {
 		OrgEmployee employee = gdao.findById(OrgEmployee.class,
 				bpmTaskInfo.getAssignedTo());
 		if (employee != null) {
@@ -295,7 +312,7 @@ public class BpmTaskInfoHastenService extends BaseDataService {
 			Map<String, Object> data = datDocumentService
 					.getDocumentById(bpmTaskInfo.getDocumentId());
 			data.put("_taskId", bpmTaskInfo.getTaskId());
-			 LOGGER.debug("重复邮件提醒: " + employee.getNickName() + " email="
+			LOGGER.debug("重复邮件提醒: " + employee.getNickName() + " email="
 					+ email);
 			DatContentTemplate datContentTemplate = datContentTemplateService
 					.load(bpmActivityMeta.getOvertimeLoopTplId());
@@ -321,44 +338,52 @@ public class BpmTaskInfoHastenService extends BaseDataService {
 			// 发送邮件
 			sendEmailService.sendEmail(email, title, content, copyTo);
 			seveEmailRecord(email, title, content, copyToEmpId, bpmTaskInfo,
-				bpmActivityMeta);
+					bpmActivityMeta);
 		}
 	}
-    
+
 	/**
 	 * 获取直属领导
-	 *@param empId
-	 *@return
-	 * @return void    返回类型 
+	 *
+	 * @param empId
+	 * @return
+	 * @return void 返回类型
 	 * @throws
 	 */
 	public OrgEmployee getLeaderShip(String empId) {
-		
+
 		OrgEmployee directorEmployee = new OrgEmployee();
 		OrgEmployee employee = gdao.findById(OrgEmployee.class, empId);
 		if (employee != null) {
-		
+
 			String hql = "from AacEmployee where lower(ad)=?";
 			List<AacEmployee> aacEmployees = gdao.queryHQL(hql, employee
 					.getEmpName().toLowerCase());
-			System.out.println("取得的直属aac："+aacEmployees);
+			System.out.println("取得的直属aac：" + aacEmployees);
 			if (!aacEmployees.isEmpty()) {
 				AacEmployee aacEmployee = aacEmployees.get(0);
-				String director=aacEmployeeService.getDirectLeader(aacEmployee);
-			    if(StringUtils.isNotBlank(director)){
-			    	LOGGER.debug("直属领导域账号"+director);
-			    	List<AacEmployee> aacEmpExist = gdao.queryHQL(hql,director.toLowerCase());
-			    	   if(!aacEmpExist.isEmpty()){
-			    		   String ad=aacEmpExist.get(0).getAd();
-			    		 OrgEmployee tmp=orgEmployeeService.getUserByCN(ad);
-			    		 if(tmp!=null){
-			    			 directorEmployee=tmp;
-			    			 System.out.println(employee.getNickName()+"的直属领导"+tmp.getNickName()+"  "+tmp.getEmail());
-			    		 }
-			    	   }
-			    }
+				String director = aacEmployeeService
+						.getDirectLeader(aacEmployee);
+				if (StringUtils.isNotBlank(director)) {
+					LOGGER.debug("直属领导域账号" + director);
+					List<AacEmployee> aacEmpExist = gdao.queryHQL(hql,
+							director.toLowerCase());
+					if (!aacEmpExist.isEmpty()) {
+						String ad = aacEmpExist.get(0).getAd();
+						OrgEmployee tmp = orgEmployeeService.getUserByCN(ad);
+						if (tmp != null) {
+							directorEmployee = tmp;
+							System.out
+									.println(employee.getNickName() + "的直属领导"
+											+ tmp.getNickName() + "  "
+											+ tmp.getEmail());
+						}
+					}
+				}
 			}
-			 LOGGER.debug(employee.getNickName()+"获取上级领导:"+directorEmployee.getNickName()+"  "+directorEmployee.getEmail());
+			LOGGER.debug(employee.getNickName() + "获取上级领导:"
+					+ directorEmployee.getNickName() + "  "
+					+ directorEmployee.getEmail());
 		}
 		return directorEmployee;
 	}
@@ -387,8 +412,6 @@ public class BpmTaskInfoHastenService extends BaseDataService {
 		}
 		return conent;
 	}
-
-	
 
 	/**
 	 * 记录邮件发送
@@ -419,16 +442,16 @@ public class BpmTaskInfoHastenService extends BaseDataService {
 			bpmEmailNotificationRecordService.create(bpmEmailRecord);
 		}
 	}
-	
+
 	/**
 	 * 时间戳格式化
+	 * 
 	 * @param timestamp
 	 * @return
 	 */
-		public String timestampFormat(Timestamp timestamp){
-			 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");  
-		   return sdf.format(timestamp); 
-		}
-		
+	public String timestampFormat(Timestamp timestamp) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		return sdf.format(timestamp);
+	}
 
 }
