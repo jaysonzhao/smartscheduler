@@ -64,11 +64,11 @@ public class BpmPushMsgResolveTask extends BaseTask {
 				url+="console/bpm/taskInfo/pullOrigMsg.xsp";
 				LOG.debug("pushmsg url="+url);
 				
-				//判断消息创建日期是否在2017-12-14日之后，在这个日期之前的消息都不进行处理了，避免产生更多的问题
+				//判断消息创建日期是否在2017-12-10日之后，在这个日期之前的消息都不进行处理了，避免产生更多的问题
 				Calendar cale=Calendar.getInstance();
 				cale.set(Calendar.YEAR, 2017);
 				cale.set(Calendar.MONTH, Calendar.DECEMBER);
-				cale.set(Calendar.DAY_OF_MONTH, 14);
+				cale.set(Calendar.DAY_OF_MONTH, 10);
 				cale.set(Calendar.HOUR_OF_DAY, 1);
 				cale.set(Calendar.MINUTE, 1);
 				cale.set(Calendar.SECOND, 1);
