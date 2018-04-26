@@ -7,6 +7,16 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.gzsolartech.schedule.service.BpmTaskInfoEmailRemindService;
+
+
+/**
+ * 
+* @ClassName: BpmTaskInfoEmailRemindTask 
+* @Description: bpm 待办每日提醒调用任务
+* @author wwd 
+* @date 2017年8月18日 下午2:07:45 
+*
+ */
 @Component
 public class BpmTaskInfoEmailRemindTask extends BaseTask{
 	private static final Logger LOGGER = LoggerFactory

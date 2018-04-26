@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import com.gzsolartech.bpmportal.service.SynchronizedDataService;
 import com.gzsolartech.smartforms.exceptions.SmartformsException;
 /**
- * @description 数据同步 
+ * @description AAC同步汇率数据同步 
  * @author hhf
  * @date 2017年5月25日 上午10:29:36
  */
@@ -30,13 +30,13 @@ public class SynchronizedDataTask extends BaseTask{
 	public void run(String jobId) {
 		SynchronizedDataService synchronizedDataService = 
 				applicationContext.getBean(SynchronizedDataService.class);
-		LOGGER.info("数据同步开始：");
+		LOGGER.info("汇率接口数据同步开始：");
 		try {
 			synchronizedDataService.execute();
 		} catch (SmartformsException e) {
 			LOGGER.error("同步数据时出现异常：",e);
 			e.printStackTrace();
 		}
-		
+		LOGGER.info("汇率接口数据同步结束：");
 	}
 }
