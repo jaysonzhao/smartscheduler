@@ -6,19 +6,20 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import com.gzsolartech.bpmportal.service.PU01ScheWrite;
 import com.gzsolartech.bpmportal.service.SynchronizedDataService;
 import com.gzsolartech.smartforms.exceptions.SmartformsException;
 /**
- * @description AAC同步汇率数据同步 
+ * @description 调度写入sap 
  * @author hhf
- * @date 2017年5月25日 上午10:29:36
+ * @date 2018年4月25日 下午9:42:55
  */
 @Component
-public class SynchronizedDataTask extends BaseTask{
+public class PU01ScheWriteTask extends BaseTask{
 	
 	private static final long serialVersionUID = 4690002209618844165L;
 	private static final Logger LOGGER = LoggerFactory
-			.getLogger(SynchronizedDataTask.class);
+			.getLogger(PU01ScheWriteTask.class);
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext)
@@ -28,15 +29,14 @@ public class SynchronizedDataTask extends BaseTask{
 
 	@Override
 	public void run(String jobId) {
-		SynchronizedDataService synchronizedDataService = 
-				applicationContext.getBean(SynchronizedDataService.class);
-		LOGGER.info("汇率接口数据同步开始：");
+		PU01ScheWrite pu01sw = 
+				applicationContext.getBean(PU01ScheWrite.class);
 		try {
-			synchronizedDataService.execute();
+			pu01sw.execute();
 		} catch (SmartformsException e) {
-			LOGGER.error("同步数据时出现异常：",e);
+			LOGGER.error("写入订单时出现异常：",e);
 			e.printStackTrace();
 		}
-		LOGGER.info("汇率接口数据同步结束：");
+		
 	}
 }
