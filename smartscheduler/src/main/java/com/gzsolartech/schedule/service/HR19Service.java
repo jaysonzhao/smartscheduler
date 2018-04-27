@@ -143,7 +143,8 @@ public class HR19Service extends BaseDataService {
 						params_emp.add(empid);
 						List<Map<String,Object>> list_emp = gdao.executeJDBCSqlQuery(sql_emp, params_emp);
 						Map<String, Object> map_emp = list_emp.get(0);
-						if(map_emp.get("email")==null){
+						System.out.println(map_emp);
+						if(map_emp.get("EMAIL")==null){
 							new EmailNotificationUtil().execute(account, password, "pengyuhuan@aactechnologies.com",
 									map_emp.get("NICK_NAME")+""+",员工表对应的邮件为空", head.toString()+body.toString());
 						}else{
