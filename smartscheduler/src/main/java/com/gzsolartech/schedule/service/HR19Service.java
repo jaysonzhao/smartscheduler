@@ -83,9 +83,9 @@ public class HR19Service extends BaseDataService {
 				List<Object> params = new ArrayList<>();
 				//String date = "2018-3-19";
 				
-				  SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");
+				 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 				  String date = sdf.format(new Date());
-				 
+				 System.out.println(date);
 				params.add(date);
 				params.add(map_place.get("META_VALUE").toString());
 			    

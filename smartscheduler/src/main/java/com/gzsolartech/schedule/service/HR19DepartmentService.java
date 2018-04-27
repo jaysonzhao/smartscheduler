@@ -64,7 +64,7 @@ public class HR19DepartmentService {
 				List<Object> params = new ArrayList<>();
 				//String date = "2018-2-8";
 				
-				 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");
+				 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 				 String date = sdf.format(new Date());
 				 
 				params.add(date);
