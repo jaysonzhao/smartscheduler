@@ -120,9 +120,11 @@ public class BpmRealityAuditRecordTask extends BaseTask {
 		for(Map<String, Object> map : infos) {
 			String ErrorCode = (String) map.get("isVP");
 			//如果是VP手动计算
-			if("Y".endsWith(ErrorCode)) {
-				String arrivalTime = (String) map.get("arrivalTime");
-				String submitTime = (String) map.get("submitTime");
+			if("Y".equals(ErrorCode)) {
+				SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//定义格式，不显示毫秒 
+
+				String arrivalTime = df.format(map.get("arrivalTime"));
+				String submitTime = df.format(map.get("submitTime"));
 				String takeTime = countTime(arrivalTime,submitTime);
 				map.put("consume", takeTime);
 			}
