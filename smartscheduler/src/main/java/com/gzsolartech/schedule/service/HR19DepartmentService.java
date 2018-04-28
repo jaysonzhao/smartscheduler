@@ -25,7 +25,7 @@ public class HR19DepartmentService {
 	private SysConfigurationService sysConfigurationService;
 	public void sendEmailDeparementService(){
 		StringBuilder head = new StringBuilder();
-		head.append("<table width='100%'>").append("<td>姓名</td>")
+		head.append("<table width='100%'>  border='1' cellspacing='0'").append("<thead><tr><td>人事子范围</td>").append("<td>姓名</td>")
 				.append("<td>工号</td>").append("<td>一级部门</td>").append("<td>二级部门</td>").append("<td>三级部门</td>")
 				.append("<td>部门总监</td>").append("<td>部门VP</td>").append("<td>提出日期</td>").append("<td>预计离职日期</td>")
 				.append("<td>离职办理日期</td>").append("<td>离职类型</td>").append("<td>离职原因</td>").append("<td>HR综合意见</td>")
@@ -53,23 +53,33 @@ public class HR19DepartmentService {
 						+ "extractvalue(x.document_data,'/root/text_agreeornotthat_display') as text_agreeornotthat_display,"
 						+ "extractvalue(x.document_data,'/root/HR19_overall') as HR19_overall,"
 						+ "extractvalue(x.document_data,'/root/continuesignmonth') as continuesignmonth,"
+						+ "extractvalue(x.document_data,'/root/managerArea') as managerArea,"
 						+ "extractvalue(x.document_data,'/root/competitionEndTime') as competitionEndTime from dat_document x, bpm_instance_info b "
 						+ " where x.form_name='Form_HR19' "
 						+ " and extractvalue(x.document_data,'/root/__docuid') = b.document_id "
 						+ " and b.INSTANCE_STATE ='STATE_FINISHED'"
 						+ "  and b.update_time between  trunc(next_day(to_date(?,'yyyy-mm-dd') - 8, 1)-6) and trunc(next_day(to_date(?,'yyyy-mm-dd') - 8, 1))    "
 						+ "  and extractvalue(x.document_data,'/root/stairDepartment') in ('研发部','射频结构研发','MEMS研发')"
-						+ " and extractvalue(x.document_data,'/root/managerArea') = ?";
+						+ " and extractvalue(x.document_data,'/root/managerArea') IN (";
 			
 				List<Object> params = new ArrayList<>();
 				//String date = "2018-2-8";
-				
+				StringBuilder sb_sql = new StringBuilder(sql);
+				StringBuilder content = new StringBuilder();
 				 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 				 String date = sdf.format(new Date());
 				 
 				params.add(date);
 				params.add(date);
-				params.add(map_place.get("META_VALUE").toString());
+				content.append(map_place.get("META_VALUE").toString());
+				String[] split2 = map_place.get("META_VALUE").toString().split(",");
+				for(int b=0;b<split2.length;b++){
+					if(b==split2.length-1){
+						sb_sql.append("'").append(split2[b]).append("'").append(")");
+					}else{
+					sb_sql.append("'").append(split2[b]).append("'").append(",");
+					}
+				}
 				List<Map<String, Object>> list = gdao.executeJDBCSqlQuery(sql, params);
 				StringBuilder body = new StringBuilder();
 				for (int i = 0; i < list.size(); i++) {
@@ -84,6 +94,7 @@ public class HR19DepartmentService {
 					List<Map<String,Object>> list_director = gdao.executeJDBCSqlQuery(sql_director, params_value);
 					List<Map<String,Object>> list_vp = gdao.executeJDBCSqlQuery(sql_vp, params_value);
 					//content.append("<td>").append(map.get("ORDERNUM").toString()).append("</td>");// 单号
+					body.append("<td>").append(map.get("MANAGERAREA")!=null?map.get("MANAGERAREA").toString():"").append("</td>");//管理区域
 					body.append("<td>").append(map.get("EMPNAME")!=null?map.get("EMPNAME").toString():"").append("</td>");// 姓名
 					body.append("<td>").append(map.get("EMPNUM")!=null?map.get("EMPNUM").toString():"").append("</td>");// 工号
 					body.append("<td>").append(map.get("STAIRDEPARTMENT")!=null?map.get("STAIRDEPARTMENT").toString():"").append("</td>");// 一级部门
@@ -120,10 +131,10 @@ public class HR19DepartmentService {
 						Map<String, Object> map_emp = list_emp.get(0);
 						if(map_emp.get("EMAIL")==null){
 							new EmailNotificationUtil().execute(account, password, "pengyuhuan@aactechnologies.com",
-									map_emp.get("NICK_NAME").toString()+",员工表对应的邮件为空", head.toString()+body.toString());
+									map_emp.get("NICK_NAME").toString()+",员工表对应的邮件为空", content.toString()+head.toString()+body.toString());
 						}else{
 						new EmailNotificationUtil().execute(account, password, map_emp.get("EMAIL").toString(),
-								map_place.get("META_VALUE").toString()+"地区,"+"离职汇总报表发送表格内容", head.toString()+body.toString());
+								map_place.get("META_VALUE").toString()+"地区,"+"离职汇总报表发送表格内容", content.toString()+head.toString()+body.toString());
 						}
 					}
 				}
