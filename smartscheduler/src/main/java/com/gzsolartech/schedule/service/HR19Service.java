@@ -28,7 +28,8 @@ public class HR19Service extends BaseDataService {
 
 	public void sendEmailService() {
 		StringBuilder head = new StringBuilder();
-		head.append("<table width='100%'>").append("<thead><tr><td>单号</td>").append("<td>姓名</td>")
+		
+		head.append("<table width='100%' border='1' cellspacing='0'").append("<thead><tr><td>人事子范围</td>").append("<td>单号</td>").append("<td>姓名</td>")
 				.append("<td>工号</td>").append("<td>一级部门</td>").append("<td>二级部门</td>").append("<td>三级部门</td>")
 				.append("<td>部门总监</td>").append("<td>部门VP</td>").append("<td>提出日期</td>").append("<td>预计离职日期</td>")
 				.append("<td>离职办理日期</td>").append("<td>离职类型</td>").append("<td>离职原因</td>").append("<td>HR综合意见</td>")
@@ -51,7 +52,7 @@ public class HR19Service extends BaseDataService {
 		List<Map<String, Object>> list_place = gdao.executeJDBCSqlQuery(sql_place);
 		for (int x = 0; x < list_place.size(); x++) {
 			Map<String, Object> map_place = list_place.get(x);
-		
+			
 			
 			String	 sql = "select extractvalue(x.document_data,'/root/orderNum') as orderNum,"
 				     	+ "extractvalue(x.document_data,'/root/empAdName') as empAdName,"
@@ -69,12 +70,13 @@ public class HR19Service extends BaseDataService {
 						+ "extractvalue(x.document_data,'/root/text_agreeornotthat_display') as text_agreeornotthat_display,"
 						+ "extractvalue(x.document_data,'/root/HR19_overall') as HR19_overall,"
 						+ "extractvalue(x.document_data,'/root/continuesignmonth') as continuesignmonth,"
+						+ "extractvalue(x.document_data,'/root/managerArea') as managerArea,"
 						+ "extractvalue(x.document_data,'/root/competitionEndTime') as competitionEndTime from dat_document x, bpm_instance_info b "
 						+ "where x.form_name='Form_HR19' "
 						+ " and extractvalue(x.document_data,'/root/__docuid') = b.document_id "
 						+ " and b.INSTANCE_STATE ='STATE_FINISHED'"
 						+ " and to_char(b.update_time,'yyyy-mm')=to_char(add_months(to_date(?,'yyyy-mm-dd'),-1),'yyyy-mm') "
-						+ " and extractvalue(x.document_data,'/root/managerArea') = ? ";
+						+ " and extractvalue(x.document_data,'/root/managerArea') IN (";
 			
 
 				// Session session = gdao.getSession();
@@ -82,14 +84,24 @@ public class HR19Service extends BaseDataService {
 				// sqlquery.setParameter(0, date);
 				List<Object> params = new ArrayList<>();
 				//String date = "2018-3-19";
-				
+				StringBuilder sb_sql = new StringBuilder(sql);
+				StringBuilder content = new StringBuilder();
 				 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 				  String date = sdf.format(new Date());
 				 System.out.println(date);
 				params.add(date);
-				params.add(map_place.get("META_VALUE").toString());
+				content.append(map_place.get("META_VALUE").toString());
+				String[] split2 = map_place.get("META_VALUE").toString().split(",");
+				for(int b=0;b<split2.length;b++){
+					if(b==split2.length-1){
+						sb_sql.append("'").append(split2[b]).append("'").append(")");
+					}else{
+					sb_sql.append("'").append(split2[b]).append("'").append(",");
+					}
+				}
+			  //  params.add(map_place.get("META_VALUE").toString());
 			    
-				List<Map<String, Object>> list = gdao.executeJDBCSqlQuery(sql,params);
+				List<Map<String, Object>> list = gdao.executeJDBCSqlQuery(sb_sql.toString(),params);
 				System.out.println(map_place.get("META_VALUE").toString()+"="+list.size());
 				/*
 				 * List<Object> param = new ArrayList<>(); param.add(date); List
@@ -107,6 +119,7 @@ public class HR19Service extends BaseDataService {
 					List<Map<String,Object>> list_vp = gdao.executeJDBCSqlQuery(sql_vp, params_value);
 					body.append("<tr>");
 					System.out.println("map=" + map);
+					body.append("<td>").append(map.get("MANAGERAREA")!=null?map.get("MANAGERAREA").toString():"").append("</td>");//管理区域
 					body.append("<td>").append(map.get("ORDERNUM")!=null?map.get("ORDERNUM").toString():"").append("</td>");// 单号
 					body.append("<td>").append(map.get("EMPNAME")!=null?map.get("EMPNAME").toString():"").append("</td>");// 姓名
 					body.append("<td>").append(map.get("EMPNUM")!=null?map.get("EMPNUM").toString():"").append("</td>");// 工号
