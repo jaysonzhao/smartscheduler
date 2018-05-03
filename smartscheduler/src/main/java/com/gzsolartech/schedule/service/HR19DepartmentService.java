@@ -25,7 +25,7 @@ public class HR19DepartmentService {
 	private SysConfigurationService sysConfigurationService;
 	public void sendEmailDeparementService(){
 		StringBuilder head = new StringBuilder();
-		head.append("<table width='100%'>  border='1' cellspacing='0'").append("<thead><tr><td>人事子范围</td>").append("<td>姓名</td>")
+		head.append("<table width='100%' border='1' cellspacing='0'>").append("<thead><tr><td>人事子范围</td>").append("<td>姓名</td>")
 				.append("<td>工号</td>").append("<td>一级部门</td>").append("<td>二级部门</td>").append("<td>三级部门</td>")
 				.append("<td>部门总监</td>").append("<td>部门VP</td>").append("<td>提出日期</td>").append("<td>预计离职日期</td>")
 				.append("<td>离职办理日期</td>").append("<td>离职类型</td>").append("<td>离职原因</td>").append("<td>HR综合意见</td>")
@@ -49,7 +49,7 @@ public class HR19DepartmentService {
 						+ "extractvalue(x.document_data,'/root/termDate') as termDate, "
 						+ "extractvalue(x.document_data,'/root/competitionStartTime') as competitionStartTime,"
 						+ "extractvalue(x.document_data,'/root/resigncause_info_n') as resigncause_info_n,"
-						+ "extractvalue(x.document_data,'/root/resigncause') as resigncause,"
+						+ "extractvalue(x.document_data,'/root/text_resigncause_display') as resigncause,"
 						+ "extractvalue(x.document_data,'/root/text_agreeornotthat_display') as text_agreeornotthat_display,"
 						+ "extractvalue(x.document_data,'/root/HR19_overall') as HR19_overall,"
 						+ "extractvalue(x.document_data,'/root/continuesignmonth') as continuesignmonth,"
@@ -80,7 +80,7 @@ public class HR19DepartmentService {
 					sb_sql.append("'").append(split2[b]).append("'").append(",");
 					}
 				}
-				List<Map<String, Object>> list = gdao.executeJDBCSqlQuery(sql, params);
+				List<Map<String, Object>> list = gdao.executeJDBCSqlQuery(sb_sql.toString(), params);
 				StringBuilder body = new StringBuilder();
 				for (int i = 0; i < list.size(); i++) {
 					Map<String, Object> map = list.get(i);
@@ -105,8 +105,8 @@ public class HR19DepartmentService {
 					body.append("<td>").append(map.get("CREATETIME")!=null?map.get("CREATETIME").toString():"").append("</td>");// 提出日期
 					body.append("<td>").append(map.get("VACATEINFODATE")!=null?map.get("VACATEINFODATE").toString():"").append("</td>");// 预计离职日期
 					body.append("<td>").append(map.get("TERMDATE")!=null?map.get("TERMDATE").toString():"").append("</td>");// 离职办理日期
-					body.append("<td>").append(map.get("RESIGNCAUSE_INFO_N")!=null?map.get("RESIGNCAUSE_INFO_N").toString():"").append("</td>");// 离职类型
-					body.append("<td>").append(map.get("RESIGNCAUSE")!=null?map.get("RESIGNCAUSE").toString():"").append("</td>");// 离职原因
+					body.append("<td>").append(map.get("RESIGNCAUSE")!=null?map.get("RESIGNCAUSE").toString():"").append("</td>");// 离职类型RESIGNCAUSE
+					body.append("<td>").append(map.get("RESIGNCAUSE_INFO_N")!=null?map.get("RESIGNCAUSE_INFO_N").toString():"").append("</td>");// 离职原因RESIGNCAUSE_INFO_N
 					body.append("<td>").append(map.get("HR19_OVERALL")!=null?map.get("HR19_OVERALL").toString():"").append("</td>");// HR综合意见
 					body.append("<td>").append(map.get("TEXT_AGREEORNOTTHAT_DISPLAY")!=null?map.get("TEXT_AGREEORNOTTHAT_DISPLAY"):"").append("</td>");// 是否竞业
 					body.append("<td>").append(map.get("COMPETITIONSTARTTIME")!=null?map.get("COMPETITIONSTARTTIME").toString():"").append("</td>");// 竞业限制开始时间
@@ -134,7 +134,7 @@ public class HR19DepartmentService {
 									map_emp.get("NICK_NAME").toString()+",员工表对应的邮件为空", content.toString()+head.toString()+body.toString());
 						}else{
 						new EmailNotificationUtil().execute(account, password, map_emp.get("EMAIL").toString(),
-								map_place.get("META_VALUE").toString()+"地区,"+"离职汇总报表发送表格内容", content.toString()+head.toString()+body.toString());
+								"研发部离职人员汇总提醒", content.toString()+head.toString()+body.toString());
 						}
 					}
 				}
