@@ -80,6 +80,7 @@ public class PU01ScheWrite extends BaseDataService{
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void updateWriteRecord(Map<String, Object> temp,String STATE,String RETURNCODE,String RETURNMSG){
 		String DOCID=temp.get("DOCID")==null?"":temp.get("DOCID").toString();
 		String ORDERNUM=temp.get("ORDERNUM")==null?"":temp.get("ORDERNUM").toString();
@@ -88,6 +89,9 @@ public class PU01ScheWrite extends BaseDataService{
 			StringBuilder sb = new StringBuilder();
 			sb.append("select * from PU01_SCHEWRITERECORD where DOCID='"+DOCID+"'");
 			List<Map<String, Object>> data = gdao.executeJDBCSqlQuery(sb.toString());
+			StringBuilder hsb = new StringBuilder();
+			hsb.append("INSERT INTO PU01_SCHEWRITERECORD_HIS (DOCID,RETURNCODE,RETURNMSG,EXECTIME) "
+					+ "VALUES ('"+DOCID+"','"+RETURNCODE+"','"+RETURNMSG+"','"+new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())+"')");
 			//存在数据时更新，没有时插入
 			if (data!=null&&!data.isEmpty()) {
 				for (Map<String, Object> map : data) {
@@ -101,6 +105,7 @@ public class PU01ScheWrite extends BaseDataService{
 					StringBuilder usb2 = new StringBuilder();
 					usb2.append("update PU01_RECORD set STATE='"+STATE+"' where DOCID='"+DOCID+"'");
 					gdao.executeJDBCSql(usb2.toString());
+					gdao.executeJDBCSql(hsb.toString());
 				}
 			}else{
 				StringBuilder isb = new StringBuilder();
@@ -112,6 +117,7 @@ public class PU01ScheWrite extends BaseDataService{
 				StringBuilder isb2 = new StringBuilder();
 				isb2.append("update PU01_RECORD set STATE='"+STATE+"' where DOCID='"+DOCID+"'");
 				gdao.executeJDBCSql(isb2.toString());
+				gdao.executeJDBCSql(hsb.toString());
 			}
 		} catch (NumberFormatException e) {
 			LOGGER.error("更新数据时出现异常：DOCID",e);
