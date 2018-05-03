@@ -66,7 +66,7 @@ public class HR19Service extends BaseDataService {
 						+ "extractvalue(x.document_data,'/root/termDate') as termDate, "
 						+ "extractvalue(x.document_data,'/root/competitionStartTime') as competitionStartTime,"
 						+ "extractvalue(x.document_data,'/root/resigncause_info_n') as resigncause_info_n,"
-						+ "extractvalue(x.document_data,'/root/resigncause') as resigncause,"
+						+ "extractvalue(x.document_data,'/root/text_resigncause_display') as resigncause,"
 						+ "extractvalue(x.document_data,'/root/text_agreeornotthat_display') as text_agreeornotthat_display,"
 						+ "extractvalue(x.document_data,'/root/HR19_overall') as HR19_overall,"
 						+ "extractvalue(x.document_data,'/root/continuesignmonth') as continuesignmonth,"
