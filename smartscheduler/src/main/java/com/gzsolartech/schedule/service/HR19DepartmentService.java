@@ -105,8 +105,8 @@ public class HR19DepartmentService {
 					body.append("<td>").append(map.get("CREATETIME")!=null?map.get("CREATETIME").toString():"").append("</td>");// 提出日期
 					body.append("<td>").append(map.get("VACATEINFODATE")!=null?map.get("VACATEINFODATE").toString():"").append("</td>");// 预计离职日期
 					body.append("<td>").append(map.get("TERMDATE")!=null?map.get("TERMDATE").toString():"").append("</td>");// 离职办理日期
-					body.append("<td>").append(map.get("RESIGNCAUSE_INFO_N")!=null?map.get("RESIGNCAUSE").toString():"").append("</td>");// 离职类型RESIGNCAUSE
-					body.append("<td>").append(map.get("RESIGNCAUSE")!=null?map.get("RESIGNCAUSE_INFO_N").toString():"").append("</td>");// 离职原因RESIGNCAUSE_INFO_N
+					body.append("<td>").append(map.get("RESIGNCAUSE")!=null?map.get("RESIGNCAUSE").toString():"").append("</td>");// 离职类型RESIGNCAUSE
+					body.append("<td>").append(map.get("RESIGNCAUSE_INFO_N")!=null?map.get("RESIGNCAUSE_INFO_N").toString():"").append("</td>");// 离职原因RESIGNCAUSE_INFO_N
 					body.append("<td>").append(map.get("HR19_OVERALL")!=null?map.get("HR19_OVERALL").toString():"").append("</td>");// HR综合意见
 					body.append("<td>").append(map.get("TEXT_AGREEORNOTTHAT_DISPLAY")!=null?map.get("TEXT_AGREEORNOTTHAT_DISPLAY"):"").append("</td>");// 是否竞业
 					body.append("<td>").append(map.get("COMPETITIONSTARTTIME")!=null?map.get("COMPETITIONSTARTTIME").toString():"").append("</td>");// 竞业限制开始时间
