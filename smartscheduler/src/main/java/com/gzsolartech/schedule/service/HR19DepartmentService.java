@@ -25,7 +25,7 @@ public class HR19DepartmentService {
 	private SysConfigurationService sysConfigurationService;
 	public void sendEmailDeparementService(){
 		StringBuilder head = new StringBuilder();
-		head.append("<table width='100%'>  border='1' cellspacing='0'").append("<thead><tr><td>人事子范围</td>").append("<td>姓名</td>")
+		head.append("<table width='100%' border='1' cellspacing='0'>").append("<thead><tr><td>人事子范围</td>").append("<td>姓名</td>")
 				.append("<td>工号</td>").append("<td>一级部门</td>").append("<td>二级部门</td>").append("<td>三级部门</td>")
 				.append("<td>部门总监</td>").append("<td>部门VP</td>").append("<td>提出日期</td>").append("<td>预计离职日期</td>")
 				.append("<td>离职办理日期</td>").append("<td>离职类型</td>").append("<td>离职原因</td>").append("<td>HR综合意见</td>")
@@ -80,7 +80,7 @@ public class HR19DepartmentService {
 					sb_sql.append("'").append(split2[b]).append("'").append(",");
 					}
 				}
-				List<Map<String, Object>> list = gdao.executeJDBCSqlQuery(sql, params);
+				List<Map<String, Object>> list = gdao.executeJDBCSqlQuery(sb_sql.toString(), params);
 				StringBuilder body = new StringBuilder();
 				for (int i = 0; i < list.size(); i++) {
 					Map<String, Object> map = list.get(i);
