@@ -162,7 +162,7 @@ public class HR19Service extends BaseDataService {
 									map_emp.get("NICK_NAME")+""+",员工表对应的邮件为空", head.toString()+body.toString());
 						}else{
 						new EmailNotificationUtil().execute(account, password, map_emp.get("EMAIL").toString(),
-								map_place.get("META_VALUE")+""+"地区,"+"离职汇总报表发送表格内容", head.toString()+body.toString());
+								"各地离职人员汇总提醒:", head.toString()+body.toString());
 						}
 					}
 				}

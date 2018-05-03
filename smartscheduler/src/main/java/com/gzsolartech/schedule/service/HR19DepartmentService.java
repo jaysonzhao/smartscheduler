@@ -134,7 +134,7 @@ public class HR19DepartmentService {
 									map_emp.get("NICK_NAME").toString()+",员工表对应的邮件为空", content.toString()+head.toString()+body.toString());
 						}else{
 						new EmailNotificationUtil().execute(account, password, map_emp.get("EMAIL").toString(),
-								map_place.get("META_VALUE").toString()+"地区,"+"离职汇总报表发送表格内容", content.toString()+head.toString()+body.toString());
+								"研发部离职人员汇总提醒", content.toString()+head.toString()+body.toString());
 						}
 					}
 				}
