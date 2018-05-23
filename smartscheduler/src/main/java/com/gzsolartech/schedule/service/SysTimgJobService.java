@@ -101,6 +101,7 @@ public class SysTimgJobService  extends BaseDataService implements
 	 * @throws
 	 */
 	public Map<String, Object> findByPage(int page, int rows) {
+		
 		Map<String, Object> dataResult = new HashMap<String, Object>();
 		List<SysTimgJob> scheduleJobs = gdao.findByPage(
 				"from  SysTimgJob order by updateTime desc", page, rows);
