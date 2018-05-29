@@ -3,27 +3,18 @@ package com.gzsolartech.bpmportal.util;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-import com.gzsolartech.smartforms.entity.DatApplication;
 import com.gzsolartech.smartforms.service.DatApplicationService;
 import com.gzsolartech.smartforms.service.DatDocumentService;
 import com.sap.conn.jco.JCoDestination;
 import com.sap.conn.jco.JCoDestinationManager;
 import com.sap.conn.jco.JCoException;
-import com.sap.conn.jco.JCoField;
-import com.sap.conn.jco.JCoFieldIterator;
 import com.sap.conn.jco.JCoFunction;
 import com.sap.conn.jco.JCoParameterList;
-import com.sap.conn.jco.JCoStructure;
 import com.sap.conn.jco.JCoTable;
 import com.sap.conn.jco.ext.DestinationDataProvider;
 
@@ -34,15 +25,6 @@ import com.sap.conn.jco.ext.DestinationDataProvider;
 public class RfcManager {
 	private JCoFunction function;
 
-	// 输入参数列表
-//	private JCoParameterList inPara = null;
-
-	// 输出参数列表
-//	private JCoParameterList outPara = null;
-//
-//	private JCoParameterList tabPara = null;
-
-//	private String functionName;
 	@Autowired
 	private DatDocumentService datDocumentService;
 	@Autowired
@@ -97,14 +79,6 @@ public class RfcManager {
 		}
 	}
 
-	/*
-	 * 设置参数 name - the name of the field to set value - the value to set for the
-	 * field
-	 */
-//	public RfcManager addParameter(String name, String value) {
-//		inPara.setValue(name, value);
-//		return this;
-//	}
 	public JCoDestination getDestination(){
 		try {
 			destination = JCoDestinationManager.getDestination(ABAP_AS);
@@ -115,48 +89,6 @@ public class RfcManager {
 		return destination;
 	}
 
-//	public RfcManager addParameter(int name, String value) {
-//		inPara.setValue(name, value);
-//		return this;
-//	}
-
-	// 执行方法
-//	public RfcManager prepare(String functionName) throws Exception {
-//		this.functionName = functionName;
-//		try {
-//			// 取得要执行的方法
-//			function = destination.getRepository().getFunction(functionName);
-//		} catch (JCoException e) {
-//			throw new Exception("SAP获取方法" + functionName + "失败："
-//					+ e.getMessage());
-//		}
-//		if (function == null) {
-//			throw new Exception(functionName + "方法不存在");
-//		}
-//		// 取得参数列表
-//		inPara = function.getImportParameterList();
-//		outPara = function.getExportParameterList();
-//		tabPara = function.getTableParameterList();
-//		return this;
-//	}
-
-	// 执行方法
-//	public JCoParameterList execCall() throws JCoException {
-//		// Execute
-//		function.execute(destination);
-//		return outPara;
-//	}
-
-	// 取得返回结果
-//	public JCoTable getResultTable(String tableName) {
-//		return tabPara.getTable(tableName);
-//	}
-
-	// //取得参数列表
-	// public JCoTable getParamTable(String tableName) {
-	// return tabPara.getTable(tableName);
-	// }
-
 	// SAP传入参数为列表
 	public JCoTable getParamTableList(String tableName) {
 		return function.getTableParameterList().getTable(tableName);
@@ -164,16 +96,13 @@ public class RfcManager {
 
 	// DisConnect
 	public void close() {
-		// if (client != null)
-		// client.disconnect();
-//		clie
+		
 	}
 
 	// Creates a connection configuration file based on parameters given above
 	static void createDataFile(String name, String suffix, Properties properties)
 			throws Exception {
 		File cfg = new File(name + "." + suffix);
-		// if (!cfg.exists()) {
 		try {
 			FileOutputStream fos = new FileOutputStream(cfg, false);
 			properties.store(fos, "ABAP_AS_WITHOUT_POOL");
@@ -181,21 +110,14 @@ public class RfcManager {
 		} catch (Exception e) {
 			throw new Exception("不能创建SAP连接需要的Destination文件" + cfg.getName());
 		}
-		// }
 	}
 
-//	public String convertNull(String str) {
-//		if (str == null)
-//			return "";
-//		return str;
-//	}
 	public JCoFunction getFunction(JCoDestination destination,String functionName) {
 		JCoFunction function = null;
 		 try {
 			function = destination.getRepository()  
 			         .getFunctionTemplate(functionName).getFunction();
 		} catch (JCoException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}  
 		return function;
