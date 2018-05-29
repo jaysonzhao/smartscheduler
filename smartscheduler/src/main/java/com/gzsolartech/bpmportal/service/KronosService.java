@@ -462,4 +462,33 @@ public Map<String, Object> getDocumentByField(String appId,String formName,Strin
 		return results;
 	}
 	
+	/**
+	 * 获取可申请假期天数
+	 * @param empNum
+	 * @param leaveType
+	 * @param startDate 
+	 * @param startTime
+	 * @param endDate
+	 * @param endTime
+	 * @return
+	 * @throws Exception
+	 */
+	public JSONObject CheckDataNoRound(String empNum,String leaveType,String startDate,String startTime,String endDate,String endTime) throws Exception{
+		XMLClient api = new XMLClient();
+		api.open(getKronosConfig());
+		String xml= "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+				+"<Kronos_WFC Version=\"1.0\">"
+				+"<Request Action=\"CheckDataNoRound\">"
+				+"<CNLeaveRequest LeaveType=\""+leaveType+"\" StartDate=\""+startDate+"\" StartTime=\""+startTime+"\" EndDate=\""+endDate+"\" EndTime=\""+endTime+"\" TBLName=\"\">"
+				+"<Employee>"
+				+"<PersonIdentity PersonNumber=\""+empNum+"\" />"
+				+"</Employee>"
+				+"</CNLeaveRequest>"
+				+"</Request>"
+				+"</Kronos_WFC>";
+		api.sendRequest(xml);
+		JSONObject resposeJson = XML.toJSONObject(api.getXmlReply()).getJSONObject("Kronos_WFC").getJSONObject("Response");
+		api.close();
+		return resposeJson;
+	}
 }

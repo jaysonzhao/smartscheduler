@@ -116,6 +116,15 @@ public class BpmRealityAuditRecordTask extends BaseTask {
 		List<Map<String, Object>>  infos = bpmRealityAuditRecordService.getNodeInfoById(nodeId, instanceId);
 		System.out.println("request  sap begin ");
 		//计算审批时长 
+		for(Map<String, Object> info :infos){
+			Date arrivalTime = (Date) info.get("arrivalTime");
+			Date submitTime = (Date) info.get("submitTime");
+			//到达时间早于提交时间
+			if(arrivalTime.getTime() - submitTime.getTime() > 0){
+				info.put("arrivalTime", submitTime);
+				info.put("submitTime", arrivalTime);
+			}
+		}
 		infos = countConsume(infos);
 		for(Map<String, Object> map : infos) {
 			String ErrorCode = (String) map.get("isVP");
@@ -178,7 +187,7 @@ public class BpmRealityAuditRecordTask extends BaseTask {
 			String isVP = "";
 			try {
 				System.out.println(" sap checkDataRound begin");
-				JSONObject jo =kronosService.checkDataRound(String.valueOf(info.get("jobNumber")), "123",
+				JSONObject jo =kronosService.CheckDataNoRound(String.valueOf(info.get("jobNumber")), "123",
 						startDate, startTime, endDate, endTime);
 				System.out.println(" sap checkDataRound end");
 				//如果查询成功，则取值
