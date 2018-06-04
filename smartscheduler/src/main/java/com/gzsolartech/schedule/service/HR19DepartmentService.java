@@ -134,10 +134,10 @@ public class HR19DepartmentService {
 							new EmailNotificationUtil().execute(account, password, "pengyuhuan@aactechnologies.com",
 									map_emp.get("NICK_NAME").toString()+",员工表对应的邮件为空", content.toString()+head.toString()+body.toString());
 						}else{
-							new EmailNotificationUtil().execute(account, password, "pengyuhuan@aactechnologies.com",
-									"研发部离职人员汇总提醒", content.toString()+head.toString()+body.toString());
-						/*new EmailNotificationUtil().execute(account, password, map_emp.get("EMAIL").toString(),
-								"研发部离职人员汇总提醒", content.toString()+head.toString()+body.toString());*/
+							/*new EmailNotificationUtil().execute(account, password, "pengyuhuan@aactechnologies.com",
+									"研发部离职人员汇总提醒", content.toString()+head.toString()+body.toString());*/
+							new EmailNotificationUtil().execute(account, password, map_emp.get("EMAIL").toString(),
+								"研发部离职人员汇总提醒", content.toString()+head.toString()+body.toString());
 						}
 					}
 				}
