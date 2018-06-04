@@ -59,7 +59,7 @@ public class HR19DepartmentService {
 						+ " and extractvalue(x.document_data,'/root/__docuid') = b.document_id "
 						+ " and b.INSTANCE_STATE ='STATE_FINISHED'"
 						+ "  and b.update_time between  trunc(next_day(to_date(?,'yyyy-mm-dd') - 8, 1)-6) and trunc(next_day(to_date(?,'yyyy-mm-dd') - 8, 1))    "
-						+ "  and extractvalue(x.document_data,'/root/stairDepartment') in ('研发部','射频结构研发','MEMS研发')"
+						+ "  and extractvalue(x.document_data,'/root/stairDepartment') in ('研发部','射频结构研发部','MEMS研发部','瑞声研究院')"
 						+ " and extractvalue(x.document_data,'/root/managerArea') IN (";
 			
 				List<Object> params = new ArrayList<>();
@@ -134,8 +134,10 @@ public class HR19DepartmentService {
 							new EmailNotificationUtil().execute(account, password, "pengyuhuan@aactechnologies.com",
 									map_emp.get("NICK_NAME").toString()+",员工表对应的邮件为空", content.toString()+head.toString()+body.toString());
 						}else{
-						new EmailNotificationUtil().execute(account, password, map_emp.get("EMAIL").toString(),
-								"研发部离职人员汇总提醒", content.toString()+head.toString()+body.toString());
+							new EmailNotificationUtil().execute(account, password, "pengyuhuan@aactechnologies.com",
+									"研发部离职人员汇总提醒", content.toString()+head.toString()+body.toString());
+						/*new EmailNotificationUtil().execute(account, password, map_emp.get("EMAIL").toString(),
+								"研发部离职人员汇总提醒", content.toString()+head.toString()+body.toString());*/
 						}
 					}
 				}
