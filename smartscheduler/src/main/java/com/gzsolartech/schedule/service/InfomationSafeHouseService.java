@@ -130,11 +130,11 @@ public class InfomationSafeHouseService extends BaseDataService {
 		if (map_emp.get("EMAIL") == null) {
 			new EmailNotificationUtil().execute(account, password, "pengyuhuan@aactechnologies.com", map_emp.get("NICK_NAME")+"为空,"+title, context);
 		} else {
-			/*
-			 * new EmailNotificationUtil().execute(account, password,
-			 * map_emp.get("EMAIL").toString(), title,context);
-			 */
-			new EmailNotificationUtil().execute(account, password, "pengyuhuan@aactechnologies.com", title, context);
+			
+			  new EmailNotificationUtil().execute(account, password,
+			  map_emp.get("EMAIL").toString(), title,context);
+			 
+			//new EmailNotificationUtil().execute(account, password, "pengyuhuan@aactechnologies.com", title, context);
 		}
 	}
 }
