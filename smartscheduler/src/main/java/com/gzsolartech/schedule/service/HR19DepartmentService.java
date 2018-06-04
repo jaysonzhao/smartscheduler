@@ -58,7 +58,7 @@ public class HR19DepartmentService {
 						+ " where x.form_name='Form_HR19' "
 						+ " and extractvalue(x.document_data,'/root/__docuid') = b.document_id "
 						+ " and b.INSTANCE_STATE ='STATE_FINISHED'"
-						+ "  and b.update_time between  trunc(next_day(to_date(?,'yyyy-mm-dd') - 8, 1)-6) and trunc(next_day(to_date(?,'yyyy-mm-dd') - 8, 1))    "
+						+ "  and trunc(b.update_time) between  trunc(next_day(to_date(?,'yyyy-mm-dd') - 8, 1)-6) and trunc(next_day(to_date(?,'yyyy-mm-dd') - 8, 1))    "
 						+ "  and extractvalue(x.document_data,'/root/stairDepartment') in (SELECT  distinct A.meta_value from dat_system_meta A,dat_system_meta_cata B WHERE b.cata_id=a.meta_cata_id AND b.cata_name='IT_Department')"
 						+ " and extractvalue(x.document_data,'/root/managerArea') IN (";
 			
