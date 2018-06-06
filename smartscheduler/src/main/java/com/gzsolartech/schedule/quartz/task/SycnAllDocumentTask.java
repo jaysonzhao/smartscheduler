@@ -98,12 +98,14 @@ public class SycnAllDocumentTask extends BaseTask  {
 		
 		for (DatDocument datDocument : docs) {
 				
-				datDocument.setDatApplication(null);
+				
 				//得到docdate
 				 String docdata = XmlDataUtils.toString(datDocument
 						.getDocumentData());
+				 String appName=datDocument.getDatApplication().getAppName();
 				 //清空docdate
 				 datDocument.setDocumentData(null);
+				 datDocument.setDatApplication(null);
 				 JSONObject  jsonObject= JSONObject.parseObject(datDocument.toString());	
 				 jsonObject.put("create_Time", datDocument.getCreateTime().getTime());
 				 jsonObject.put("update_Time", datDocument.getUpdateTime().getTime());
@@ -143,12 +145,11 @@ public class SycnAllDocumentTask extends BaseTask  {
 			 //索引必须为小写
 				 //得到请求的地址ES
 			 String url=config.get("searchCfg").toString()+"/"+
-					PREFIX+datDocument.getFormName().toLowerCase();
+					PREFIX+(appName+datDocument.getFormName()).toLowerCase();
 			  String msg="";
 			 if(serivce.getIndex(datDocument.getFormName().toLowerCase())){
 				 url+="/docinfo/"+datDocument.getDocumentId();
 				 //新增文档
-				 System.out.println(jsonObject);
 				 msg=clientUtils.doPut(url,  JSON.toJSONString(jsonObject)).getMsg();
 			 }else{
 				 //删除es索引
@@ -192,7 +193,7 @@ public class SycnAllDocumentTask extends BaseTask  {
 						 + "			}"
 						 + "	}"
 						 + "}";
-				 System.out.println("----------"+clientUtils.doPut(settingsUrl,mapping).getMsg());
+				clientUtils.doPut(settingsUrl,mapping).getMsg();
 				 
 				//打开索引
 				 String openUrl=url+"/_open";
