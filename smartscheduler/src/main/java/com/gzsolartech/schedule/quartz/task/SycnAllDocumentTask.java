@@ -16,6 +16,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.gzsolartech.bpmportal.entity.DocSycnFailRecord;
 import com.gzsolartech.bpmportal.entity.DocSycnUpdateRecord;
@@ -25,6 +26,7 @@ import com.gzsolartech.smartforms.constant.SysConfigurationTypeName;
 import com.gzsolartech.smartforms.entity.DatDocument;
 import com.gzsolartech.smartforms.entity.DatDocumentRight;
 import com.gzsolartech.smartforms.service.DatDocumentRightService;
+import com.gzsolartech.smartforms.service.DatDocumentService;
 import com.gzsolartech.smartforms.service.DatTableRowService;
 import com.gzsolartech.smartforms.service.SysConfigurationService;
 import com.gzsolartech.smartforms.utils.HttpClientUtils;
@@ -68,7 +70,8 @@ public class SycnAllDocumentTask extends BaseTask  {
 		
 		DatDocumentRightService datDocumentRightService = 
 				applicationContext.getBean(DatDocumentRightService.class);
-		
+		DatDocumentService datDocumentService = 
+				applicationContext.getBean(DatDocumentService.class);
 		
 		Map<String, Object> config = sysConfigurationService
 				.getSysConfiguration(SysConfigurationTypeName.SYSTEM_CONFIG);
@@ -102,7 +105,8 @@ public class SycnAllDocumentTask extends BaseTask  {
 				//得到docdate
 				 String docdata = XmlDataUtils.toString(datDocument
 						.getDocumentData());
-				 String appName=datDocument.getDatApplication().getAppName();
+				 DatDocument datDocument_= datDocumentService.loadWithDatApp(datDocument.getDocumentId());
+				 String appName=datDocument_.getDatApplication().getAppName();
 				 //清空docdate
 				 datDocument.setDocumentData(null);
 				 datDocument.setDatApplication(null);
@@ -110,15 +114,17 @@ public class SycnAllDocumentTask extends BaseTask  {
 				 jsonObject.put("create_Time", datDocument.getCreateTime().getTime());
 				 jsonObject.put("update_Time", datDocument.getUpdateTime().getTime());
 				 
-				 org.json.JSONObject jsoDocData = XML.toJSONObject(docdata);
-				
-				 if (jsoDocData.has("root")) {
+				 JSONObject jsoDocData = XmlDataUtils.xmlToJson(docdata);
+				 recJson(jsoDocData);
+				 if (jsoDocData.containsKey("root")) {
 							jsonObject.put("root", JSONObject.parse(jsoDocData.get("root").toString()));
 				 }
 				
 				
 				 Map<String, Object>  tableRows= datTableRowService.getDatas(datDocument.getDocumentId());
-			     jsonObject.put("tableRows", tableRows);
+				 JSONObject itemJSONObj = JSONObject.parseObject(JSON.toJSONString(tableRows));
+				 recJson(itemJSONObj);
+			     jsonObject.put("tableRows", itemJSONObj);
 			     
 			     
 				Map<String, Object> acl = new HashMap<String, Object>();
@@ -211,15 +217,24 @@ public class SycnAllDocumentTask extends BaseTask  {
 				 serivce.saveIndex(index);
 			 }
 			 
-		    JSONObject info=JSONObject.parseObject(msg);
-		    
-		    if(info.containsKey("_shards")){
-		    	if(info.getJSONObject("_shards").getInteger("successful")<1){
-		    		fail.add(failRecord(datDocument.getDocumentId()));
-		    	}
-		    }else{
-		    	fail.add(failRecord(datDocument.getDocumentId()));
-		    }
+			 try {
+				   JSONObject info=JSONObject.parseObject(msg);
+				    if(info.containsKey("_shards")){
+				    	if(info.getJSONObject("_shards").getInteger("successful")<1){
+				    		fail.add(failRecord(datDocument.getDocumentId()));
+				    	}
+				    }else{
+				    	fail.add(failRecord(datDocument.getDocumentId()));
+				    }
+			} catch (Exception e) {
+				fail.add(failRecord(datDocument.getDocumentId()));
+				 try {
+						Thread.sleep(5000);
+					} catch (InterruptedException e1) {
+						// TODO Auto-generated catch block
+						LOG.error(e1.getMessage(),e);
+					}
+			}
 		}
 		
 		 //新增记录
@@ -239,6 +254,36 @@ public class SycnAllDocumentTask extends BaseTask  {
 	
 	
 
+	public static void recJson(JSONObject jso){
+		for (String key :jso.keySet()) {
+			Object obj=jso.get(key);
+			if (obj instanceof JSONArray) {
+				recJsonArray(obj);
+			} else if (obj instanceof JSONObject) {
+				recJson((JSONObject)obj);
+			} else  {
+				jso.put(key, " "+obj);
+			}
+		}
+	}
+	
+	
+	public static void recJsonArray(Object obj){
+		
+		if (obj instanceof JSONArray) {
+		JSONArray temp=	(JSONArray)obj;
+			for (int i = 0; i < temp.size(); i++) {
+				if (temp.get(i) instanceof JSONArray) {
+					recJsonArray(temp.get(i));
+				}else if( temp.get(i) instanceof JSONObject){
+					recJson((JSONObject)temp.get(i));
+				}
+			}
+		} else if (obj instanceof JSONObject) {
+			recJson((JSONObject)obj);
+		} 
+		
+	}
 	
 	
 	
