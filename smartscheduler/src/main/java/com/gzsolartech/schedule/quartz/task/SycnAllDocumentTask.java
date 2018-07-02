@@ -232,7 +232,7 @@ public class SycnAllDocumentTask extends BaseTask  {
 						Thread.sleep(5000);
 					} catch (InterruptedException e1) {
 						// TODO Auto-generated catch block
-						e1.printStackTrace();
+						LOG.error(e1.getMessage(),e);
 					}
 			}
 		}
