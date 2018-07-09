@@ -1,4 +1,4 @@
-package com.gzsolartech.bpmportal.util;
+/*package com.gzsolartech.bpmportal.util;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -63,10 +63,10 @@ public class Xwpf {
 	public static String readWord2003(String file) throws IOException{
 		return new WordExtractor( new FileInputStream(file)).getText();  
 	}
-	/* public static String readECLCE2003(String file)throws IOException, XmlException, OpenXML4JException{
+	 public static String readECLCE2003(String file)throws IOException, XmlException, OpenXML4JException{
 		   return new ExcelExtractor(new FileInputStream(file)).getText();   
 		   
-	 }*/
+	 }
 	
 	public static String readPPT2003(String file) throws IOException{
         PowerPointExtractor extractor=new PowerPointExtractor(new FileInputStream(file));
@@ -100,4 +100,4 @@ public class Xwpf {
             }
         }
     }
- }  
+ }  */

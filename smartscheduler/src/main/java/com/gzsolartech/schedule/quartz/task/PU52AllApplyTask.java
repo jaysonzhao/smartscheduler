@@ -25,7 +25,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.gzsolartech.bpmportal.entity.ApplySycnFailRecord;
 import com.gzsolartech.bpmportal.entity.ApplySycnUpdateRecord;
 import com.gzsolartech.bpmportal.util.ApplySycnConstant;
-import com.gzsolartech.bpmportal.util.Xwpf;
+//import com.gzsolartech.bpmportal.util.Xwpf;
 import com.gzsolartech.schedule.service.PU52Service;
 import com.gzsolartech.smartforms.constant.AppAclObjectType;
 import com.gzsolartech.smartforms.entity.DatDocAttachment;
@@ -91,8 +91,8 @@ public class PU52AllApplyTask  extends BaseTask {
 				 	//docid 不可能为空，所以直接转换成字符串
 				 	String docId=String.valueOf(list.get(i).get("DOCUMENT_ID"));
 				 	//根据文档id获取文档内容
-					List<Map<String, String>> attachments = getAttachments(docId);
-					list.get(i).put("attachments", attachments);
+					/*List<Map<String, String>> attachments = getAttachments(docId);
+					list.get(i).put("attachments", attachments);*/
 					Map<String, List<String>>  acls=   getAcl(docId);
 					list.get(i).put("acls", acls);
 					 
@@ -165,7 +165,7 @@ public class PU52AllApplyTask  extends BaseTask {
 	 * @param docfiles
 	 * @return
 	 */
-	public List<Map<String, String>> getAttachments(String documentId){
+	/*public List<Map<String, String>> getAttachments(String documentId){
 		
 		List<Map<String, String>> attachments = new ArrayList<Map<String, String>>();
 		DatDocAttachmentService datDocAttachmentService=
@@ -225,7 +225,7 @@ public class PU52AllApplyTask  extends BaseTask {
 		}
 		return attachments;
 		
-	}
+	}*/
 	
 	/**
 	 * 得到文档的权限信息
