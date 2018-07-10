@@ -50,7 +50,7 @@ public class HR0002ServiceTask extends BaseTask{
 	        	 endDate =k.get("PERIODEND").substring(0,9);
 	        	 endTime =k.get("PERIODEND").substring(k.get("PERIODEND").length()- 5);
 		       
-	        	 String temp = KronosService.xiujia2(k.get("SAPNO"), k.get("LEAVETYPE"), startDate, startTime,endDate, endTime, k.get("startOrEnd")).toString();
+	        	 String temp = KronosService.xiujia2(k.get("SAPNO"), k.get("LEAVETYPE"), startDate, startTime,endDate, endTime).toString();
 		       
 	        
 		       // System.out.println("temp : " + temp);
