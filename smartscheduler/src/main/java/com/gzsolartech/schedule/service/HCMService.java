@@ -1,4 +1,4 @@
-package com.gzsolartech.schedule.service;
+﻿package com.gzsolartech.schedule.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -298,6 +298,7 @@ public class HCMService extends BaseDataService {
 						temp.setDetailName(extable.getString("ZGZLCT"));
 						break;
 					case HcmDataTypeName.LWGS :
+						temp.setParentCode(extable.getString("ZHRZPQD"));
 						temp.setDetailCode(extable.getString("ZQDMX"));
 						temp.setDetailName(extable.getString("ZQDMXT"));
 						break;
