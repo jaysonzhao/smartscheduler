@@ -524,4 +524,37 @@ public Map<String, Object> getDocumentByField(String appId,String formName,Strin
 		api.close();
 		return resposeJson;
 	}
+	
+	/**
+	 * 签卡写入
+	 * @param leave
+	 * @return
+	 * @throws Exception
+	 */
+	public JSONObject qianka(String Date, String Time, String CommentText, String OverrideTypeName, String empNum) throws Exception{
+		XMLClient api = new XMLClient();
+		api.open(getKronosConfig());
+		StringBuilder tmpXML = new StringBuilder();
+		tmpXML.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+				+"<Kronos_WFC Version=\"1.0\">");
+		tmpXML.append("<Request Action=\"AddOnly\">"
+				+"<Punch>"
+					+ "<Date>"+Date+"</Date>"
+					+ "<Time>"+Time+"</Time>"
+					+ "<CommentText>"+CommentText+"</CommentText>"
+					+ "<OverrideTypeName>"+OverrideTypeName+"</OverrideTypeName>"
+					+"<Employee>"
+						+"<PersonIdentity PersonNumber=\""+empNum+"\" />"
+					+"</Employee>"
+				+"</Punch>"
+				+"</Request>");
+		tmpXML.append("</Kronos_WFC>");
+		String xml = tmpXML.toString();
+		System.out.println("sendXML:" + xml);
+		api.sendRequest(xml);
+		String resXml = api.getXmlReply();
+		System.out.println("resXML:" + resXml);
+		api.close();
+		return XML.toJSONObject(resXml).getJSONObject("Kronos_WFC").getJSONObject("Response");
+	}
 }
