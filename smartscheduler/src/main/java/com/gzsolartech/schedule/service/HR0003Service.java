@@ -32,8 +32,11 @@ public class HR0003Service extends BaseDataService{
 			+"WHERE trow.document_id = tdoc.document_id "
 				+"AND tins.document_id = tdoc.document_id "
 				+"AND tdoc.form_name = '"+formName+"' "
-				+"AND extractvalue(trow.row_data, '//root/row/writeStatus') != 'Success' "
-				;//+"and tins.instance_state = 'STATE_FINISHED' ";
+				+"AND ( "
+					+ "extractvalue(trow.row_data, '//root/row/writeStatus') != 'Success' "
+					+ "OR extractvalue(trow.row_data, '//root/row/writeStatus') IS NULL "
+					+ ") "
+				+"and tins.instance_state = 'STATE_FINISHED' ";
 		SQLQuery rs = gdao.getSession().createSQLQuery(sql.toString());
 		rs.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
 		return rs.list();
