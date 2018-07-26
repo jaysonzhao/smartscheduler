@@ -7,25 +7,20 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-/**
- * 模块调度失败记录表
- * @author solar
- *
- */
 @Entity
-@Table(name = "APPLY_SYCN_FAIL_RECORD")
-public class ApplySycnFailRecord {
-	
+@Table(name = "DOC_SYCN_UPDATE_RECORD")
+public class DocSycnUpdateRecord {
+
 	
 		//ID
 		private String id;
-		//执行模块
-		private String modular;
+		 
+		//记录的更新时间
+		private Timestamp updateTime;
 		//调度执行时间
 		private Timestamp createTime;
-		//文档ID 
-		private String documentId;
-		
+	
+
 		@Id
 		@Column(name = "ID", unique = true, nullable = false, length = 100)
 		public String getId() {
@@ -34,12 +29,14 @@ public class ApplySycnFailRecord {
 		public void setId(String id) {
 			this.id = id;
 		}
-		@Column(name = "MODULAR", length = 100)
-		public String getModular() {
-			return modular;
+		
+		 
+		@Column(name = "UPDATE_TIME", length = 7)
+		public Timestamp getUpdateTime() {
+			return updateTime;
 		}
-		public void setModular(String modular) {
-			this.modular = modular;
+		public void setUpdateTime(Timestamp updateTime) {
+			this.updateTime = updateTime;
 		}
 		@Column(name = "CREATE_TIME", length = 7)
 		public Timestamp getCreateTime() {
@@ -47,18 +44,7 @@ public class ApplySycnFailRecord {
 		}
 		public void setCreateTime(Timestamp createTime) {
 			this.createTime = createTime;
-		}
-		@Column(name = "DOCUMENT_ID", length = 100)
-		public String getDocumentId() {
-			return documentId;
-		}
-		public void setDocumentId(String documentId) {
-			this.documentId = documentId;
-		}
-		
-		
-		
-		
-		
-		
+		} 
+
+	
 }
