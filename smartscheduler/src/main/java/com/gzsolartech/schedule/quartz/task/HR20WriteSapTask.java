@@ -30,7 +30,7 @@ public class HR20WriteSapTask extends BaseTask{
 				.getBean(HR20WriteSapService.class);
 		try {
 			//同步BPM实例状态
-			LOG.info("转正人员信息回写SAP正在执行...");
+			LOG.error("转正人员信息回写SAP正在执行...");
 			hr20WriteSapService.writeSap();
 		} catch (Exception ex) {
 			LOG.error("转正人员信息回写SAP执行异常！", ex);
