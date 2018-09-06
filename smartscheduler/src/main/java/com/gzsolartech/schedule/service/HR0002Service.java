@@ -12,6 +12,7 @@ import org.hibernate.SQLQuery;
 import org.hibernate.transform.Transformers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import com.gzsolartech.smartforms.constant.EntityIdPrefix;
 import com.gzsolartech.smartforms.entity.DatApplication;
 import com.gzsolartech.smartforms.entity.OrgCompany;
@@ -250,12 +251,12 @@ public class HR0002Service extends BaseDataService{
 	 * @param leaveIds
 	 * @param status
 	 */
-	public int updateLeaveStatus(String ids, String status){
+	public int updateRowStatus(List<String> ids, String status){
 		String sql = "update dat_document t "
-				+ "set t.document_data = updatexml(t.document_data, '//root/status','<status vtype=\"value\" datatype=\"text\">" + status + "</status>'), "
-				+ "t.update_time = SYSDATE where t.document_id ='"+ids+"'";
+				+ " set t.document_data = updatexml(t.document_data, '//root/status','<status>" + status + "</status>') "
+				+ " where t.document_id in ( :ids )";
 		SQLQuery rs = gdao.getSession().createSQLQuery(sql);
-		rs.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
+		rs.setParameterList("ids", ids);
 		return rs.executeUpdate();
 	}
 	
@@ -482,7 +483,7 @@ public class HR0002Service extends BaseDataService{
 	 */
 	public List<Map<String, String>> hqxrsj() {
 		List<Object> params = new ArrayList<Object>();
-		String sql = "select DOCUID, SAPNO, LEAVETYPE, PERIODSTART, PERIODEND,STATUS,STARTOREND from HR_Leave where NOT STATUS='SUCCESS' and NOT STATUS='UNDO'";
+		String sql = "select DOCUID, SAPNO, LEAVETYPE, PERIODSTART, PERIODEND,STATUS,STARTOREND from HR_Leave where status2 IS NOT NULL and  taskName = '已完成' and  status ='否' ";
 		List<Map<String, String>> list1 = gdao.executeJDBCSqlQuery(sql);
 //		System.out.println(list1);
 		return list1;
