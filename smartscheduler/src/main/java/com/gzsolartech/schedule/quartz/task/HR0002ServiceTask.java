@@ -1,6 +1,10 @@
 package com.gzsolartech.schedule.quartz.task;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import net.sf.json.JSONObject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,26 +43,32 @@ public class HR0002ServiceTask extends BaseTask{
 			//System.out.println("定时任务");
 			//获取写入数据
 			List<Map<String, String>> list =	HR0002Service.hqxrsj();
+			List<String> successIds = new ArrayList<String>();
 			for (Map<String, String> k : list)
-		    {
-				  String startDate="";
-		    	  String startTime="";
-		    	  String endDate="";
-		    	  String endTime="";
-	        	 startDate =k.get("PERIODSTART").substring(0,10);
-	        	 startTime =k.get("PERIODSTART").substring(k.get("PERIODSTART").length()- 5);
-	        	 endDate =k.get("PERIODEND").substring(0,9);
-	        	 endTime =k.get("PERIODEND").substring(k.get("PERIODEND").length()- 5);
-		       
-	        	 String temp = KronosService.xiujia2(k.get("SAPNO"), k.get("LEAVETYPE"), startDate, startTime,endDate, endTime).toString();
-		       
-	        
-		       // System.out.println("temp : " + temp);
-		        int num = 0;
-		        num = HR0002Service.updateLeaveStatus(k.get("DOCUID"), temp.valueOf("Status"));
+			{
+				String startDate="";
+				String startTime="";
+				String endDate="";
+				String endTime="";
+				startDate =k.get("PERIODSTART").substring(0,10);
+				startTime =k.get("PERIODSTART").substring(k.get("PERIODSTART").length()- 5);
+				endDate =k.get("PERIODEND").substring(0,10);
+				endTime =k.get("PERIODEND").substring(k.get("PERIODEND").length()- 5);
+			   
+				String temp = KronosService.xiujia(k.get("SAPNO"), k.get("LEAVETYPE"), startDate, startTime,endDate, endTime).toString();
+				JSONObject result=JSONObject.fromObject(temp); 
+			 
+				//写入成功id
+				String Status = result.getString("Status");
+				if(Status.equals("Success")){
+					successIds.add(k.get("DOCUID"));
+				}
 		    }
+			//写入成功改变状态
+			 if(successIds.size() > 0)
+				 HR0002Service.updateRowStatus(successIds, "SUCCESS");
 		} catch (Exception ex) {
-			LOG.error("转正人员信息回写SAP执行异常！", ex);
+			LOG.error("请假调休写入SAP失败！", ex);
 		}
 	}
 
