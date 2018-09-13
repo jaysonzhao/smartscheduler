@@ -25,7 +25,7 @@ public class BPMIT00013SendEmailTask extends BaseTask{
 		LOGGER.debug("BPM中服务器文件夹权限申请到期定时邮件任务执行");
 		IT00013SendEmailService IT00013SendEmailService = (IT00013SendEmailService) applicationContext.getBean("IT00013SendEmailService");
 		try {
-			//IT00013SendEmailService.prepareSendEmailToAppliant();
+			IT00013SendEmailService.prepareSendEmailToAppliant();
 			IT00013SendEmailService.prepareSendEmailToManager();
 		} catch (Exception e) {
 			e.printStackTrace();
