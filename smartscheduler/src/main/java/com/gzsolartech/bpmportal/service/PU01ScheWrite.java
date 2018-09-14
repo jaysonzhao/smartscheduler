@@ -71,7 +71,12 @@ public class PU01ScheWrite extends BaseDataService{
 					updateWriteRecord(map, "true", EP_SUBRC, EP_MSG);
 					Z_BPM_MM_UPOTEXT(ORDERNUM,HTEXT,SAPCLIENT);
 				}else{
-					updateWriteRecord(map, "false", EP_SUBRC, EP_MSG);
+					if("订单已完全批准".equals(EP_MSG) || "采购订单不存在或删除,请检查输入!".equals(EP_MSG)){
+						updateWriteRecord(map, "true", EP_SUBRC, EP_MSG);
+					}else{
+						updateWriteRecord(map, "false", EP_SUBRC, EP_MSG);
+					}
+					
 				}
 			}
 		} catch (Exception e) {
