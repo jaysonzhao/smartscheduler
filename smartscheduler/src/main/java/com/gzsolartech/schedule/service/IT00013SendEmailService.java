@@ -47,7 +47,7 @@ public class IT00013SendEmailService extends BaseDataService {
 			documentid = datas.get(i).get("DOCUMENTID");
 			appid = datas.get(i).get("APPID");
 			// 您申请的XX权限将于10日后到期，如需继续使用，请及时续申请。点此可查看上次申请情况：单号链接
-			String url = "http://bpmtest.aact.com/console/template/engine/opendocument/" + appid + "/" + documentid + ".xsp";
+			String url = "http://bpm.aac.com/console/template/engine/opendocument/" + appid + "/" + documentid + ".xsp";
 			content = "您申请的" + foldername + "服务器文件夹访问权限将于10日后到期，如需继续使用，请及时续申请。点此可查看上次申请情况："
 					+ "<a href="+url+">单号链接</a>";
 			title = foldername + "文件夹访问权限即将到期提醒";
@@ -92,7 +92,7 @@ public class IT00013SendEmailService extends BaseDataService {
 			starttime = datas.get(i).get("STARTTIME");
 			endtime = datas.get(i).get("ENDTIME");
 			foldername = datas.get(i).get("FOLDERNAME");
-			String url = "http://bpmtest.aact.com/console/template/engine/opendocument/" + appid + "/" + documentid + ".xsp";
+			String url = "http://bpm.aac.com/console/template/engine/opendocument/" + appid + "/" + documentid + ".xsp";
 			// 您申请的XX权限将于10日后到期，如需继续使用，请及时续申请。点此可查看上次申请情况：单号链接
 			content = "	员工编号：" + jobnumber +"</br>"
 					 +" 域帐号：" + empnum +"</br>"
