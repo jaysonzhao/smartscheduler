@@ -116,6 +116,15 @@ public class BpmRealityAuditRecordTask extends BaseTask {
 		List<Map<String, Object>>  infos = bpmRealityAuditRecordService.getNodeInfoById(nodeId, instanceId);
 		System.out.println("request  sap begin ");
 		//计算审批时长 
+		for(Map<String, Object> info :infos){
+			Date arrivalTime = (Date) info.get("arrivalTime");
+			Date submitTime = (Date) info.get("submitTime");
+			//到达时间早于提交时间
+			if(arrivalTime.getTime() - submitTime.getTime() > 0){
+				info.put("arrivalTime", submitTime);
+				info.put("submitTime", arrivalTime);
+			}
+		}
 		infos = countConsume(infos);
 		for(Map<String, Object> map : infos) {
 			String ErrorCode = (String) map.get("isVP");
@@ -178,7 +187,7 @@ public class BpmRealityAuditRecordTask extends BaseTask {
 			String isVP = "";
 			try {
 				System.out.println(" sap checkDataRound begin");
-				JSONObject jo =kronosService.checkDataRound(String.valueOf(info.get("jobNumber")), "123",
+				JSONObject jo =kronosService.CheckDataNoRound(String.valueOf(info.get("jobNumber")), "123",
 						startDate, startTime, endDate, endTime);
 				System.out.println(" sap checkDataRound end");
 				//如果查询成功，则取值
@@ -192,11 +201,20 @@ public class BpmRealityAuditRecordTask extends BaseTask {
 					if("1201".equals(error.get("ErrorCode")+"")) {
 						//判断是否vp
 						List<AacEmployee> emps= bpmRealityAuditRecordService.getAACUser(String.valueOf(info.get("jobNumber")));
+						if(emps.size()<1){
+							LOGGER.debug("====找不到工号为===="+info.get("jobNumber")+"====的用户===！！");
+							LOGGER.error("====找不到工号为===="+info.get("jobNumber")+"====的用户===！！");
+						}
 						//非vp找上级继续调用一次
 						if(!"10103".equals(emps.get(0).getPositionlevel()) && !"10104".equals(emps.get(0).getPositionlevel())) {
 							List<Map<String, Object>> list = bpmRealityAuditRecordService.getLleader(String.valueOf(getDirectLeader(emps.get(0))));
-							jo =kronosService.checkDataRound(String.valueOf(list.get(0).get("EMP_NUM")), "123",
-									startDate, startTime, endDate, endTime);
+							if(list.size()>0){
+								jo =kronosService.checkDataRound(String.valueOf(list.get(0).get("EMP_NUM")), "123",
+										startDate, startTime, endDate, endTime);
+							}else{
+								LOGGER.debug("====该用户没有直接领导===="+info.get("jobNumber"));
+								LOGGER.error("====该用户没有直接领导===="+info.get("jobNumber"));
+							}
 							if("Success".equals(String.valueOf(jo.get("Status")))){
 								JSONObject request = jo.getJSONObject("CNLeaveRequest");
 								//获取任务处理时长(小时)

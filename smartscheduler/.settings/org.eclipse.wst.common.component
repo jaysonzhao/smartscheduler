@@ -2,11 +2,10 @@
     <wb-module deploy-name="aac_smartforms">
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
-        <wb-resource deploy-path="/" source-path="/WebContent" tag="defaultRootSource"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/.apt_generated"/>
         <wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
-        <wb-resource deploy-path="/" source-path="/src/main/webapp"/>
-        <property name="java-output-path" value="/smartscheduler/target/classes"/>
-        <property name="context-root" value="smartformsQuartz"/>
+        <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
+        <property name="java-output-path" value="/smartforms/target/classes"/>
+        <property name="context-root" value="smartscheduler"/>
     </wb-module>
 </project-modules>
