@@ -187,7 +187,7 @@ public class HCMService extends BaseDataService {
 						temp.setDetailName(extable.getString("BUTXT"));
 						break;
 					case HcmDataTypeName.RYFW :
-						temp.setDetailCode(extable.getString("BUKRS"));
+						temp.setDetailCode(extable.getString("PERSA"));
 						temp.setDetailName(extable.getString("NAME1"));
 						break;
 					case HcmDataTypeName.GYZ :
@@ -285,6 +285,7 @@ public class HCMService extends BaseDataService {
 						temp.setParentCode(extable.getString("ZCS"));
 						temp.setDetailCode(extable.getString("ZGZQY"));
 						temp.setDetailName(extable.getString("ZGZQYT"));
+						data.add(temp);
 						temp = new HcmDictionariesTemp();
 						temp.setTbName(tbname);
 						temp.setParentCode(extable.getString("ZGZQY"));
@@ -298,6 +299,7 @@ public class HCMService extends BaseDataService {
 						temp.setDetailName(extable.getString("ZGZLCT"));
 						break;
 					case HcmDataTypeName.LWGS :
+						temp.setParentCode(extable.getString("ZHRZPQD"));
 						temp.setDetailCode(extable.getString("ZQDMX"));
 						temp.setDetailName(extable.getString("ZQDMXT"));
 						break;
@@ -351,7 +353,6 @@ public class HCMService extends BaseDataService {
 						temp.setParentCode(extable.getString("ZXMID"));
 						temp.setDetailCode(extable.getString("ZWLID"));
 						temp.setDetailName(extable.getString("ZWLNAME"));
-						data.add(temp);
 						break;
 					case HcmDataTypeName.ZZGD :
 						temp.setParentCode(extable.getString("ZYWFW"));
@@ -363,7 +364,6 @@ public class HCMService extends BaseDataService {
 						temp.setParentCode(extable.getString("ZXM"));
 						temp.setDetailCode(extable.getString("ZGD"));
 						temp.setDetailName(extable.getString("ZGDNAME"));
-						data.add(temp);
 						break;
 					case HcmDataTypeName.BZZW :
 						temp.setDetailCode(extable.getString("GWLBM"));//业务领域

@@ -141,6 +141,39 @@ private static final Logger LOG = LoggerFactory
 		return resposeJson;
 	}
 	/**
+	 * 定时调度使用
+	 * @param empNum
+	 * 员工编号
+	 * @param LeaveType
+	 * 假期类型
+	 * @param startDate
+	 * @param startTime
+	 * 开始时间
+	 * @param endDate
+	 * @param endTime
+	 * 结束时间
+	 * @return
+	 * @throws Exception
+	 */
+	public JSONObject xiujia2(String empNum,String LeaveType,String startDate,String startTime,String endDate,String endTime) throws Exception{
+		XMLClient api = new XMLClient();
+		api.open(getKronosConfig());
+		String xml= "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+				+"<Kronos_WFC Version=\"1.0\">"
+				+"<Request Action=\"Update\">"
+				+"<CNLeaveRequest LeaveType=\""+LeaveType+"\" StartDate=\""+startDate+"\" StartTime=\""+startTime+"\" EndDate=\""+endDate+"\" EndTime=\""+endTime+"\" TBLName=\"\">"
+				+"<Employee>"
+				+"<PersonIdentity PersonNumber=\""+empNum+"\" />"
+				+"</Employee>"
+				+"</CNLeaveRequest>"
+				+"</Request>"
+				+"</Kronos_WFC>";
+		api.sendRequest(xml);
+		JSONObject resposeJson = XML.toJSONObject(api.getXmlReply()).getJSONObject("Kronos_WFC").getJSONObject("Response");
+		api.close();
+		return resposeJson;
+	}
+	/**
 	 * 获取假期类型
 	 * @return
 	 * @throws Exception
@@ -490,5 +523,38 @@ public Map<String, Object> getDocumentByField(String appId,String formName,Strin
 		JSONObject resposeJson = XML.toJSONObject(api.getXmlReply()).getJSONObject("Kronos_WFC").getJSONObject("Response");
 		api.close();
 		return resposeJson;
+	}
+	
+	/**
+	 * 签卡写入
+	 * @param leave
+	 * @return
+	 * @throws Exception
+	 */
+	public JSONObject qianka(String Date, String Time, String CommentText, String OverrideTypeName, String empNum) throws Exception{
+		XMLClient api = new XMLClient();
+		api.open(getKronosConfig());
+		StringBuilder tmpXML = new StringBuilder();
+		tmpXML.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+				+"<Kronos_WFC Version=\"1.0\">");
+		tmpXML.append("<Request Action=\"AddOnly\">"
+				+"<Punch>"
+					+ "<Date>"+Date+"</Date>"
+					+ "<Time>"+Time+"</Time>"
+					+ "<CommentText>"+CommentText+"</CommentText>"
+					+ "<OverrideTypeName>"+OverrideTypeName+"</OverrideTypeName>"
+					+"<Employee>"
+						+"<PersonIdentity PersonNumber=\""+empNum+"\" />"
+					+"</Employee>"
+				+"</Punch>"
+				+"</Request>");
+		tmpXML.append("</Kronos_WFC>");
+		String xml = tmpXML.toString();
+		System.out.println("sendXML:" + xml);
+		api.sendRequest(xml);
+		String resXml = api.getXmlReply();
+		System.out.println("resXML:" + resXml);
+		api.close();
+		return XML.toJSONObject(resXml).getJSONObject("Kronos_WFC").getJSONObject("Response");
 	}
 }
