@@ -82,7 +82,6 @@ public class SycnAllDocumentTask extends BaseTask  {
 
 		HttpClientUtils clientUtils = new HttpClientUtils();
 		String uuid = UUID.randomUUID().toString();
-
 		List<DatDocument> docs = new ArrayList<DatDocument>();
 		List<DocSycnFailRecord> fail = new ArrayList<DocSycnFailRecord>();
 		// 获取上次更新时间
@@ -103,13 +102,7 @@ public class SycnAllDocumentTask extends BaseTask  {
 				e2.printStackTrace();
 			}
 
-			try {
-
-			} catch (Exception e) {
-				// TODO: handle exception
-			}
-
-			try {
+			
 
 				if (differentDays(updateDate, newDate) > 4) {
 					int differentDays = differentDays(updateDate, newDate) % 4 == 0 ? differentDays(
@@ -128,7 +121,7 @@ public class SycnAllDocumentTask extends BaseTask  {
 						updateTime = format.format(update);
 
 						for (DatDocument datDocument : docs) {
-
+							try {
 							// 得到docdate
 							String docdata = XmlDataUtils.toString(datDocument
 									.getDocumentData());
@@ -260,7 +253,7 @@ public class SycnAllDocumentTask extends BaseTask  {
 										.toLowerCase());
 								serivce.saveIndex(index);
 							}
-							try {
+							
 								JSONObject info = JSONObject.parseObject(msg);
 								if (info.containsKey("_shards")) {
 									if (info.getJSONObject("_shards")
@@ -273,6 +266,7 @@ public class SycnAllDocumentTask extends BaseTask  {
 											.getDocumentId()));
 								}
 							} catch (Exception e) {
+							
 								fail.add(failRecord(datDocument.getDocumentId()));
 								try {
 									Thread.sleep(5000);
@@ -282,7 +276,6 @@ public class SycnAllDocumentTask extends BaseTask  {
 								}
 							}
 						}
-
 						// 新增记录
 						DocSycnUpdateRecord newRecord = new DocSycnUpdateRecord();
 						newRecord.setId(uuid);
@@ -297,12 +290,187 @@ public class SycnAllDocumentTask extends BaseTask  {
 						}
 					}
 
+				}else{
+					
+					
+					docs = serivce.getDocumentByupdateTime(updateTime,
+							format.format(new Date()));
+
+					for (DatDocument datDocument : docs) {
+						try {
+						// 得到docdate
+						String docdata = XmlDataUtils.toString(datDocument
+								.getDocumentData());
+						DatDocument datDocument_ = datDocumentService
+								.loadWithDatApp(datDocument.getDocumentId());
+						String appName = datDocument_.getDatApplication()
+								.getAppName();
+						// 清空docdate
+						datDocument.setDocumentData(null);
+						datDocument.setDatApplication(null);
+						JSONObject jsonObject = JSONObject
+								.parseObject(datDocument.toString());
+						jsonObject.put("create_Time", datDocument
+								.getCreateTime().getTime());
+						jsonObject.put("update_Time", datDocument
+								.getUpdateTime().getTime());
+
+						JSONObject jsoDocData = XmlDataUtils
+								.xmlToJson(docdata);
+						recJson(jsoDocData);
+						if (jsoDocData.containsKey("root")) {
+							jsonObject.put("root", JSONObject
+									.parse(jsoDocData.get("root")
+											.toString()));
+						}
+
+						Map<String, Object> tableRows = datTableRowService
+								.getDatas(datDocument.getDocumentId());
+						JSONObject itemJSONObj = JSONObject
+								.parseObject(JSON.toJSONString(tableRows));
+						recJson(itemJSONObj);
+						jsonObject.put("tableRows", itemJSONObj);
+
+						Map<String, Object> acl = new HashMap<String, Object>();
+						List<String> empId = new ArrayList<String>();
+						List<String> roleId = new ArrayList<String>();
+						List<String> depId = new ArrayList<String>();
+
+						List<DatDocumentRight> acls = datDocumentRightService
+								.getDocumentRights(datDocument
+										.getDocumentId());
+						for (int i = 0; i < acls.size(); i++) {
+							if (acls.get(i).getRightObjectType()
+									.equals("employee")) {
+								empId.add(acls.get(i).getRightObjectId());
+							} else if (acls.get(i).getRightObjectType()
+									.equals("department")) {
+								depId.add(acls.get(i).getRightObjectId());
+							} else {
+								roleId.add(acls.get(i).getRightObjectId());
+							}
+						}
+						acl.put("empId", empId);
+						acl.put("depId", depId);
+						acl.put("roleId", roleId);
+						jsonObject.put("acls", acl);
+
+						// 索引必须为小写
+						// 得到请求的地址ES
+						String url = config.get("searchCfg").toString()
+								+ "/"
+								+ PREFIX
+								+ (appName + datDocument.getFormName())
+										.toLowerCase();
+						String msg = "";
+						if (serivce.getIndex(datDocument.getFormName()
+								.toLowerCase())) {
+							url += "/docinfo/"
+									+ datDocument.getDocumentId();
+							// 新增文档
+							msg = clientUtils.doPut(url,
+									JSON.toJSONString(jsonObject)).getMsg();
+						} else {
+							// 删除es索引
+							String delUrl = url + "/docinfo";
+							clientUtils.doDel(delUrl).getMsg();
+							// 新建
+							clientUtils.doPut(url, "{}").getMsg();
+							// 关闭索引
+							String closeUrl = url + "/_close";
+							clientUtils.doPut(closeUrl, "{}").getMsg();
+							// 基本映射
+							String settingsUrl = url + "/_settings";
+							// todo映射文
+							String mapping = "{\"settings\":"
+									+ "{"
+									+ " \"index.mapping.total_fields.limit\":30000,"
+									+ "\"index\":{\"max_result_window\":100000000 }"
+									+ "},"
+									+ "\"mappings\":"
+									+ "	{\"docinfo\":"
+									+ "			{\"dynamic\":true,"
+									+ "			 \"properties\":"
+									+ "					{\"attachments.fileContext\":"
+									+ "						{\"type\":\"attachment\","
+									+ "						 \"fields\":"
+									+ "								{\"content\":{"
+									+ "									\"language\":\"zh_cn\","
+									+ "									\"type\":\"text\","
+									+ "									\"analyzer\":\"ik_smart\","
+									+ "									\"search_analyzer\":\"ik_smart\","
+									+ "									\"include_in_all\":\"true\","
+									+ "									\"boost\":8,"
+									+ "									\"term_vector\":\"with_positions_offsets\","
+									+ "									\"store\":true}"
+									+ "								}"
+									+ "						},"
+									+ "			   \"create_Time\":{\"type\":\"date\"},"
+									+ "			   \"update_Time\":{\"type\":\"date\"}"
+									+ "				   }" + "			}" + "	}" + "}";
+							clientUtils.doPut(settingsUrl, mapping)
+									.getMsg();
+
+							// 打开索引
+							String openUrl = url + "/_open";
+							clientUtils.doPut(openUrl, "{}").getMsg();
+							// 新增文档
+							url += "/docinfo/"
+									+ datDocument.getDocumentId();
+							msg = clientUtils.doPut(url,
+									JSON.toJSONString(jsonObject)).getMsg();
+
+							// 新增索引记录
+							ESIndex index = new ESIndex();
+							index.setId(UUID.randomUUID().toString());
+							index.setCreateTime(new Timestamp(System
+									.currentTimeMillis()));
+							index.setIndexs(datDocument.getFormName()
+									.toLowerCase());
+							serivce.saveIndex(index);
+						}
+						
+						
+							JSONObject info = JSONObject.parseObject(msg);
+							if (info.containsKey("_shards")) {
+								if (info.getJSONObject("_shards")
+										.getInteger("successful") < 1) {
+									fail.add(failRecord(datDocument
+											.getDocumentId()));
+								}
+							} else {
+								fail.add(failRecord(datDocument
+										.getDocumentId()));
+							}
+						} catch (Exception e) {
+							fail.add(failRecord(datDocument.getDocumentId()));
+							e.printStackTrace();
+							try {
+								Thread.sleep(5000);
+							} catch (InterruptedException e1) {
+								// TODO Auto-generated catch block
+								LOG.error(e1.getMessage(), e);
+							}
+						}
+					}
+				
+					// 新增记录
+					DocSycnUpdateRecord newRecord = new DocSycnUpdateRecord();
+					newRecord.setId(uuid);
+					newRecord.setUpdateTime(new Timestamp(System
+							.currentTimeMillis()));
+					newRecord.setCreateTime(new Timestamp(System
+							.currentTimeMillis()));
+					serivce.save(newRecord);
+					// 记录失败的记录
+					if (fail.size() > 0) {
+						serivce.saveFail(fail);
+					}
+					
+					
 				}
 
-			} catch (Exception e) {
-				// TODO: handle exception
-			}
-
+			
 		}
 
 	}
@@ -364,6 +532,7 @@ public class SycnAllDocumentTask extends BaseTask  {
         
         int year1 = cal1.get(Calendar.YEAR);
         int year2 = cal2.get(Calendar.YEAR);
+        System.out.println(year1+"---------"+year2);
         if(year1 != year2)   //同一年
         {
             int timeDistance = 0 ;
