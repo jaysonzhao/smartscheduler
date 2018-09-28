@@ -56,5 +56,11 @@ public class SycnAllDocumentService  extends BaseDataService {
 	}
 
 
-	
+	public List<DatDocument> getDocumentByupdateTime(String updateTime1,String updateTime2) {
+		String hql = "from DatDocument where "
+				+ "updateTime >to_date('"+updateTime1+"','YYYY-MM-DD HH24:MI:SS') and "
+						+ "updateTime < to_date('"+updateTime2+"','YYYY-MM-DD HH24:MI:SS')";
+		List<DatDocument> docList = gdao.queryHQL(hql);
+		return docList;
+	}
 }
