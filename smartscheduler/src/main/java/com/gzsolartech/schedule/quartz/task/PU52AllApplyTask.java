@@ -78,7 +78,7 @@ public class PU52AllApplyTask  extends BaseTask {
 		 
 			if(record==null){
 				 //如果上次更新时间为空的情况下则执行全表查询写入
-				 list=pu52Serivce.getAllappLy(ALLAPPLYTYPE,null);
+				 list=pu52Serivce.getAllappLy(ALLAPPLYTYPE,null); 
 			}else{
 				//如果不为空的情况下，则安装更新时间更新，当时间大于记录表中的时间的内容执行更新/新增功能
 				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

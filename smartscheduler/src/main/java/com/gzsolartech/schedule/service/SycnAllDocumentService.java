@@ -45,7 +45,7 @@ public class SycnAllDocumentService  extends BaseDataService {
 	
 	public List<DatDocument> getAllDocument() {
 		String hql = " from DatDocument  order by update_Time";
-		List<DatDocument> docList = gdao.queryHQL(hql);
+		List<DatDocument> docList = gdao.queryHQL(hql); 
 		return docList;
 	}
 	

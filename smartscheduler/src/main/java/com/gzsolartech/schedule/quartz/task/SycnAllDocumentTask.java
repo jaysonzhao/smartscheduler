@@ -117,7 +117,7 @@ public class SycnAllDocumentTask extends BaseTask  {
 		    	   c.setTime(updateDate);        
 		    	   c.add(Calendar.DAY_OF_MONTH, 4);// 今天+1天      
 		    	   Date update = c.getTime();     
-		    	   System.out.println(updateTime+"--------------"+format.format(update));
+		    	   //System.out.println(updateTime+"--------------"+format.format(update));
 		    	   docs=serivce.getDocumentByupdateTime(updateTime,format.format(update));
 		    	   updateDate=update;
 		    	   updateTime=format.format(update);
@@ -355,7 +355,7 @@ public class SycnAllDocumentTask extends BaseTask  {
         }
         else    //不同年
         {
-            System.out.println("判断day2 - day1 : " + (day2-day1));
+        //    System.out.println("判断day2 - day1 : " + (day2-day1));
             return day2-day1;
         }
     }
@@ -386,7 +386,7 @@ public class SycnAllDocumentTask extends BaseTask  {
 		    	   c.setTime(updateDate);        
 		    	   c.add(Calendar.DAY_OF_MONTH, 4);// 今天+1天      
 		    	   Date update = c.getTime();     
-		    	   System.out.println(updateTime+"--------------"+format.format(update));
+		    	//   System.out.println(updateTime+"--------------"+format.format(update));
 		    	   
 		    	   updateDate=update;
 		    	   updateTime=format.format(update);
