@@ -87,7 +87,7 @@ public class PU52AllApplyTask  extends BaseTask {
 			}
 			
 			 for (int i = 0; i < list.size(); i++) {
-				 	//docid 不可能为空，所以直接转换成字符串
+			try { 	//docid 不可能为空，所以直接转换成字符串
 				 	String docId=String.valueOf(list.get(i).get("DOCUMENT_ID"));
 				 	//根据文档id获取文档内容
 				 	//List<Map<String, String>> attachments = getAttachments(docId);
@@ -103,6 +103,11 @@ public class PU52AllApplyTask  extends BaseTask {
 			    		result=false;
 			    		fail.add(failRecord(docId));
 			    	}
+			    	
+				} catch (Exception e) {
+//					e.printStackTrace();
+					
+				}
 			    	
 			 }
 			
