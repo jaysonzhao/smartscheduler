@@ -1,14 +1,17 @@
 package com.gzsolartech.schedule.quartz.task;
 
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.json.XML;
+import org.quartz.DisallowConcurrentExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -38,6 +41,7 @@ import com.gzsolartech.smartforms.utils.XmlDataUtils;
  *
  */
 @Component
+@DisallowConcurrentExecution
 public class SycnAllDocumentTask extends BaseTask  {
 
 	/**
@@ -88,16 +92,36 @@ public class SycnAllDocumentTask extends BaseTask  {
 		List<DocSycnFailRecord>  fail=new ArrayList<DocSycnFailRecord>();
 		//获取上次更新时间
 		DocSycnUpdateRecord record=	serivce.getUpdateInfo();
-		if(record==null){
-			//获取整个doc信息
-			 docs=serivce.getAllDocument();
-		}else{
-			//根据上一次更新时间，获取之间文档信息
-			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			String updateTime=format.format(record.getUpdateTime());
-			docs=serivce.getDocumentByupdateTime(updateTime);
-			
+		//备注：默认记录不为空；第一次调用需要往数据库中添加第一条数据
+		//根据上一次更新时间，获取之间文档信息
+		if(record!=null){
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		String updateTime=format.format(record.getUpdateTime());
+		
+		
+		 Date newDate = new Date();
+         Date updateDate=new Date();
+		try {
+			updateDate = format.parse(updateTime);
+		} catch (ParseException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
 		}
+           
+         if(differentDays(updateDate,newDate)>4)  {
+        	 int differentDays= differentDays(updateDate,newDate)%4==0?
+		    		  differentDays(updateDate,newDate)/4:differentDays(updateDate,newDate)/4+1;
+        	 for (int j = 0; j < differentDays; j++) {
+        		 
+        		   Calendar c = Calendar.getInstance();    
+		    	   c.setTime(updateDate);        
+		    	   c.add(Calendar.DAY_OF_MONTH, 4);// 今天+1天      
+		    	   Date update = c.getTime();     
+		    	   //System.out.println(updateTime+"--------------"+format.format(update));
+		    	   docs=serivce.getDocumentByupdateTime(updateTime,format.format(update));
+		    	   updateDate=update;
+		    	   updateTime=format.format(update);
+				
 		
 		for (DatDocument datDocument : docs) {
 				
@@ -249,6 +273,10 @@ public class SycnAllDocumentTask extends BaseTask  {
 			 if(fail.size()>0){
 				 serivce.saveFail(fail);
 			 }
+           }		 
+         }
+       }
+		 	 
 	}
 
 	
@@ -296,6 +324,74 @@ public class SycnAllDocumentTask extends BaseTask  {
 		return failInfo;
 	}
 	
+	public static int differentDays(Date date1,Date date2)
+    {
+        Calendar cal1 = Calendar.getInstance();
+        cal1.setTime(date1);
+        
+        Calendar cal2 = Calendar.getInstance();
+        cal2.setTime(date2);
+       int day1= cal1.get(Calendar.DAY_OF_YEAR);
+        int day2 = cal2.get(Calendar.DAY_OF_YEAR);
+        
+        int year1 = cal1.get(Calendar.YEAR);
+        int year2 = cal2.get(Calendar.YEAR);
+        if(year1 != year2)   //同一年
+        {
+            int timeDistance = 0 ;
+            for(int i = year1 ; i < year2 ; i ++)
+            {
+                if(i%4==0 && i%100!=0 || i%400==0)    //闰年            
+                {
+                    timeDistance += 366;
+                }
+                else    //不是闰年
+                {
+                    timeDistance += 365;
+                }
+            }
+            
+            return timeDistance + (day2-day1) ;
+        }
+        else    //不同年
+        {
+        //    System.out.println("判断day2 - day1 : " + (day2-day1));
+            return day2-day1;
+        }
+    }
 	
+	
+	public static void main(String[] args) throws ParseException {
+		
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		String updateTime=format.format(format.parse("2018-09-01 00:00:00"));
+		
+		
+		 Date newDate = new Date();
+         Date updateDate=new Date();
+		try {
+			updateDate = format.parse(updateTime);
+		} catch (ParseException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		
+		
+	     if(differentDays(updateDate,newDate)>4)  {
+        	 int differentDays= differentDays(updateDate,newDate)%4==0?
+		    		  differentDays(updateDate,newDate)/4:differentDays(updateDate,newDate)/4+1;
+        	 for (int j = 0; j < differentDays; j++) {
+        		 
+        		   Calendar c = Calendar.getInstance();    
+		    	   c.setTime(updateDate);        
+		    	   c.add(Calendar.DAY_OF_MONTH, 4);// 今天+1天      
+		    	   Date update = c.getTime();     
+		    	//   System.out.println(updateTime+"--------------"+format.format(update));
+		    	   
+		    	   updateDate=update;
+		    	   updateTime=format.format(update);
+		    	   }
+        	 }
+	}
 	
 }
